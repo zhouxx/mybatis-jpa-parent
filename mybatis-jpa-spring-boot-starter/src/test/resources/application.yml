@@ -1,0 +1,19 @@
+
+spring:
+  profiles:
+    active: dev
+  datasource:
+    url: jdbc:mysql://localhost:3306/test?characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&useInformationSchema=true
+    username: root
+    password: root
+
+
+logging:
+  level:
+    com.alilitech: debug
+
+
+mybatis:
+  mapper-scan:
+    basePackages: "com.alilitech.**.mapper"
+

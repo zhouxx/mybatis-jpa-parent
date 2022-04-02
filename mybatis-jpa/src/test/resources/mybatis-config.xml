@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<!--mybatis主配置文件-->
+<configuration>
+    <settings>
+        <!-- 设置日志输出为LOG4J -->
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+        <!--将以下画线方式命名的数据库列映射到 Java 对象的驼峰式命名属性中-->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+    </settings>
+
+    <!--default: 设置默认环境-->
+    <environments default="development">
+        <!--配置环境-->
+        <environment id="development">
+            <!--配置事务类型-->
+            <transactionManager type="JDBC"/>
+            <!--配置数据源(连接池)-->
+            <dataSource type="POOLED">
+                <!--配置连接数据库的基本信息-->
+                <property name="driver" value="com.mysql.jdbc.Driver"/>
+                <property name="url"
+                          value="jdbc:mysql://localhost:3306/test?useSSL=false&amp;allowMultiQueries=true&amp;useSSL=false&amp;serverTimezone=GMT%2b8"/>
+                <property name="username" value="root"/>
+                <property name="password" value="root"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <!--指定映射配置文件的位置-->
+    <mappers>
+        <package name="com.alilitech.mybatis.jpa.test.mapper"/>
+    </mappers>
+</configuration>
+
