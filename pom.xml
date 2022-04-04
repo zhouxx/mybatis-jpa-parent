@@ -16,6 +16,28 @@
         <module>mybatis-jpa-generator</module>
     </modules>
 
+    <name>boot-plus</name>
+    <description>mybatis jpa is an ORM framework based on mybatis.</description>
+    <url>http://mybatisjpa.alilitech.com/</url>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Zhou Xiaoxiang</name>
+            <email>mozu_2008@163.com</email>
+            <organization>none</organization>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:git@github.com:zhouxx/mybatis-jpa-parent.git</connection>
+        <developerConnection>scm:git:git@github.com:zhouxx/mybatis-jpa-parent.git</developerConnection>
+        <url>git@github.com:zhouxx/mybatis-jpa-parent.git</url>
+    </scm>
+
     <properties>
         <mybatis.version>3.5.9</mybatis.version>
         <mybatis.spring.version>2.0.7</mybatis.spring.version>
