@@ -1,7 +1,7 @@
- <center><h1>Mybatis-Jpa</h1></center>
-<center>A ORM framework</center>
-<center><b>Smilar with Data Jpa, More Flexible, Base on Mybatis,  Code Generator</b></center>
-<center>English | 中文</center>
+<h1 align="center">Mybatis-Jpa</h1>
+<p align="center">A ORM framework</p>
+<p align="center"><b>Smilar with Data Jpa, More Flexible, Base on Mybatis,  Code Generator</b></p>
+<p align="center">English | 中文</p>
 
 ## Document
 
