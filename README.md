@@ -2,10 +2,9 @@
 <p align="center">A ORM framework</p>
 <p align="center"><b>Smilar with Data Jpa, More Flexible, Base on Mybatis,  Code Generator</b></p>
 <p align="center">English | 中文</p>
-
 ## Document
 
-
+click [Link](https://zhouxx.github.io/mybatis-jpa-parent/ )
 
 ## Features
 
