@@ -44,6 +44,11 @@ public enum GenerationType {
     UUID,
 
     /**
+     * Comb UUID
+     */
+    COMB_UUID,
+
+    /**
      * Distribute id with snowflake.
      */
     SNOWFLAKE

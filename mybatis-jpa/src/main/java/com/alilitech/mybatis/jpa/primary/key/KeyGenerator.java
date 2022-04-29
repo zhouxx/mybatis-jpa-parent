@@ -25,6 +25,6 @@ public interface KeyGenerator {
     /**
      * generate key
      */
-    Object generate();
+    Object generate(Object entity);
 
 }

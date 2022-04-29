@@ -25,7 +25,7 @@ import com.alilitech.mybatis.jpa.parameter.GenerationType;
 public class KeyGenerator4Auto implements KeyGenerator {
 
     @Override
-    public Object generate() {
+    public Object generate(Object entity) {
         return null;
     }
 }

@@ -67,7 +67,7 @@ public class PreMapperStatementBuilder4Find extends PreMapperStatementBuilder {
         PartTree partTree = buildPartTree();
 
         String operation = "SELECT";
-        String selectPart = entityMetaData.getColumnNames();
+        String selectPart = entityMetaData.getColumnNamesString();
 
         if(partTree.isCountProjection() || partTree.isExistsProjection()) {
             selectPart = "COUNT(*)";
@@ -86,7 +86,7 @@ public class PreMapperStatementBuilder4Find extends PreMapperStatementBuilder {
         RenderContext context = new RenderContext();
         partTree.render(context);
 
-        /**
+        /*
          * if {@link SubQueryContainer} containers statementId, parse the predicates and orders
          */
         if(SubQueryContainer.getInstance().isExist(methodDefinition.getStatementId())) {

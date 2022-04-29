@@ -49,7 +49,7 @@ public class PreMapperStatementBuilder4FindSpecification extends PreMapperStatem
     protected String buildSQL() {
 
         String operation = "SELECT";
-        String selectPart = entityMetaData.getColumnNames();
+        String selectPart = entityMetaData.getColumnNamesString();
         List<String> sqlParts = Arrays.asList(
                 operation,
                 selectPart,

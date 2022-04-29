@@ -53,7 +53,7 @@ public class PreMapperStatementBuilder4FindAll extends PreMapperStatementBuilder
         //sql parts
         List<String> sqlParts = Arrays.asList(
                 "SELECT",
-                entityMetaData.getColumnNames(),
+                entityMetaData.getColumnNamesString(),
                 "FROM",
                 entityMetaData.getTableName(),
                 buildSort()

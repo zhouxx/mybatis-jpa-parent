@@ -30,7 +30,7 @@ public class KeyGenerator4UUID implements KeyGenerator {
      * System {@link UUID} and replace all '-'
      */
     @Override
-    public Object generate() {
+    public Object generate(Object entity) {
         return UUID.randomUUID().toString().replace("-", "");
     }
 }

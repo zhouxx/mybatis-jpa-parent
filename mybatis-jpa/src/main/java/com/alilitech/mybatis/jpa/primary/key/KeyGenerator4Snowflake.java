@@ -35,7 +35,7 @@ public class KeyGenerator4Snowflake implements KeyGenerator {
     }
 
     @Override
-    public Object generate() {
+    public Object generate(Object entity) {
         return snowflakeGenerator.generate(snowflakeContext);
     }
 

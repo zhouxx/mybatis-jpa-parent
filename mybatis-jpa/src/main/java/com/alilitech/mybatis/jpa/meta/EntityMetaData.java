@@ -20,9 +20,7 @@ import com.alilitech.mybatis.jpa.definition.GenericType;
 import com.alilitech.mybatis.jpa.util.EntityUtils;
 
 import java.lang.reflect.Field;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -46,23 +44,25 @@ public class EntityMetaData {
     /** column元数据集 {key-fieldName} */
     private Map<String, ColumnMetaData> columnMetaDataMap;
 
-    private String columnNames;
+    private Set<String> columnNames;
 
     public EntityMetaData(Class<?> clazz) {
         this.entityType = clazz;
 
         // 初始化集合
         columnMetaDataMap = new LinkedHashMap<>();
+        columnNames = new HashSet<>();
 
         init();
     }
 
     public EntityMetaData(GenericType genericType) {
-        this.entityType = (Class)genericType.getDomainType();
-        this.idType = (Class)genericType.getIdType();
+        this.entityType = (Class<?>)genericType.getDomainType();
+        this.idType = (Class<?>)genericType.getIdType();
 
         // 初始化集合
         columnMetaDataMap = new LinkedHashMap<>();
+        columnNames = new HashSet<>();
 
         init();
     }
@@ -73,8 +73,6 @@ public class EntityMetaData {
         // 持久化字段集
         List<Field> fields = EntityUtils.getPersistentFields(entityType);
 
-        StringBuilder columnNamesTemp = new StringBuilder();
-
         for (Field field : fields) {
             ColumnMetaData columnMetaData = new ColumnMetaData(field, this);
             if(columnMetaData.isPrimaryKey()) {
@@ -83,10 +81,9 @@ public class EntityMetaData {
 
             columnMetaDataMap.put(field.getName(), columnMetaData);
             if(!columnMetaData.isJoin()) {
-                columnNamesTemp.append(", ").append(columnMetaData.getColumnName());
+                columnNames.add(columnMetaData.getColumnName());
             }
         }
-        columnNames = columnNamesTemp.substring(1);
     }
 
     public Class<?> getEntityType() {
@@ -129,12 +126,12 @@ public class EntityMetaData {
         this.columnMetaDataMap = columnMetaDataMap;
     }
 
-    public String getColumnNames() {
+    public Set<String> getColumnNames() {
         return columnNames;
     }
 
-    public void setColumnNames(String columnNames) {
-        this.columnNames = columnNames;
+    public String getColumnNamesString(){
+        return String.join(", ", columnNames);
     }
 
     public String getColumnNames(String alias) {

@@ -70,14 +70,14 @@ public class ParameterAssistant {
 
         if (mappedStatement.getSqlCommandType() == SqlCommandType.INSERT) {
 
-            //set the primary key
             /**
+             * set the primary key
              * first: according to {@link GenerationType} to get {@link KeyGenerator}
              */
             GenerationType idGenerationType = entityMetaData.getPrimaryColumnMetaData().getIdGenerationType();
 
             //get id generator class
-            Class generatorClass = entityMetaData.getPrimaryColumnMetaData().getIdGeneratorClass();
+            Class<? extends KeyGenerator> generatorClass = entityMetaData.getPrimaryColumnMetaData().getIdGeneratorClass();
 
             KeyGenerator keyGenerator = null;
 
@@ -99,7 +99,7 @@ public class ParameterAssistant {
 
             if(keyGenerator != null) {
                 try {
-                    Object idValue = keyGenerator.generate();
+                    Object idValue = keyGenerator.generate(parameterObject);
                     metaObject.setValue(entityMetaData.getPrimaryColumnMetaData().getProperty(), idValue);
                 } catch (Exception e) {
                     log.error("Primary key generate failed, check your id generator '" + keyGenerator.getClass() + "'", e);

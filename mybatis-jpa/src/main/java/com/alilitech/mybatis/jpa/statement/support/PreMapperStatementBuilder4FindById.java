@@ -58,7 +58,7 @@ public class PreMapperStatementBuilder4FindById extends PreMapperStatementBuilde
         //sql parts
         List<String> sqlParts = Arrays.asList(
                 "SELECT",
-                entityMetaData.getColumnNames(),
+                entityMetaData.getColumnNamesString(),
                 "FROM",
                 entityMetaData.getTableName(),
                 context.getScript()

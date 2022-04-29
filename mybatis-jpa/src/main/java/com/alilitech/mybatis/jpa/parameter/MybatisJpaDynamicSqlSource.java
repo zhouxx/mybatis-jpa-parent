@@ -30,6 +30,8 @@ import org.apache.ibatis.scripting.xmltags.DynamicSqlSource;
 import org.apache.ibatis.scripting.xmltags.SqlNode;
 import org.apache.ibatis.session.Configuration;
 
+import java.util.Map;
+
 /**
  * 扩展DynamicSqlSource，主要是扩展一些参数信息和转换
  * @author Zhou Xiaoxiang
@@ -61,20 +63,23 @@ public class MybatisJpaDynamicSqlSource extends DynamicSqlSource {
             }
         } else if(parameterObject instanceof MapperMethod.ParamMap && domainType != null) {
             MapperMethod.ParamMap<?> paramMap = (MapperMethod.ParamMap<?>) parameterObject;
-            paramMap.forEach((key, value) -> {
-                if(value instanceof Sort) {
+            for (Map.Entry<String, ?> entry : paramMap.entrySet()) {
+                Object value = entry.getValue();
+                if (value instanceof Sort) {
                     Sort sort = (Sort) value;
-                    for(Order order : sort.getOrders()) {
+                    for (Order order : sort.getOrders()) {
                         EntityMetaData entityMetaData = EntityMetaDataRegistry.getInstance().get(domainType);
-                        if(entityMetaData.getColumnMetaDataMap().containsKey(order.getProperty())) {
+                        if (entityMetaData.getColumnMetaDataMap().containsKey(order.getProperty())) {
                             String columnName = entityMetaData.getColumnMetaDataMap().get(order.getProperty()).getColumnName();
                             order.setProperty(columnName);
-                        } else {
+                        } else if(!entityMetaData.getColumnNames().contains(order.getProperty()))  {
                             throw new MybatisJpaException("Order property=>" + order.getProperty() + " is not exist in class '" + entityMetaData.getEntityType().getName() + "'");
                         }
                     }
+                    // an execution only has one Sort
+                    break;
                 }
-            });
+            }
         }
 
         // 转换规格查询参数
