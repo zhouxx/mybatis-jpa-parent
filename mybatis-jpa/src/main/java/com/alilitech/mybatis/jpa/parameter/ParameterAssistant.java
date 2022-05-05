@@ -82,7 +82,7 @@ public class ParameterAssistant {
             KeyGenerator keyGenerator = null;
 
             // UUID global
-            if(idGenerationType == GenerationType.UUID) {
+            if(idGenerationType == GenerationType.UUID || idGenerationType == GenerationType.COMB_UUID) {
                 keyGenerator = GeneratorRegistry.getInstance().get(idGenerationType);
             }
             // SNOWFLAKE for every entity

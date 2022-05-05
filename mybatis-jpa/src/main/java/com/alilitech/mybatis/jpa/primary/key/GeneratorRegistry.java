@@ -39,6 +39,7 @@ public class GeneratorRegistry {
 
     private GeneratorRegistry() {
         register(GenerationType.UUID, new KeyGenerator4UUID());
+        register(GenerationType.COMB_UUID, new KeyGenerator4CombUUID());
     }
 
     public static GeneratorRegistry getInstance() {
