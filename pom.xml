@@ -7,7 +7,7 @@
     <groupId>com.alilitech</groupId>
     <artifactId>mybatis-jpa-parent</artifactId>
     <packaging>pom</packaging>
-    <version>2.0.1</version>
+    <version>2.0.2</version>
 
     <modules>
         <module>mybatis-jpa</module>
@@ -16,7 +16,7 @@
         <module>mybatis-jpa-generator</module>
     </modules>
 
-    <name>boot-plus</name>
+    <name>mybatis-jpa-parent</name>
     <description>mybatis jpa is an ORM framework based on mybatis.</description>
     <url>http://mybatisjpa.alilitech.com/</url>
     <licenses>
