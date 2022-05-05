@@ -28,7 +28,7 @@ public class TestDept {
 
     @Id
     //@GeneratedValue(generatorClass = MyGenerator.class)
-    @GeneratedValue(GenerationType.UUID)
+    @GeneratedValue(GenerationType.COMB_UUID)
     private String deptId;
 
     private String deptNo;
