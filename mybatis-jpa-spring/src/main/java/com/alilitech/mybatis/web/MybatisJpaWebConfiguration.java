@@ -27,22 +27,30 @@ import java.util.List;
  * @since 1.0
  */
 @ConditionalOnClass(WebMvcConfigurer.class)
-public class MybatisJpaWebConfiguration implements WebMvcConfigurer {
-
-    @Bean
-    public PageableArgumentResolver mybatisPageableResolver() {
-        return new PageableArgumentResolver(mybatisSortResolver());
-    }
+public class MybatisJpaWebConfiguration {
 
     @Bean
     public SortArgumentResolver mybatisSortResolver() {
         return new SortArgumentResolver();
     }
 
-    @Override
-    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-        argumentResolvers.add(mybatisSortResolver());
-        argumentResolvers.add(mybatisPageableResolver());
+    @Bean
+    public PageableArgumentResolver mybatisPageableResolver(SortArgumentResolver sortArgumentResolver) {
+        return new PageableArgumentResolver(sortArgumentResolver);
     }
+
+    @Bean
+    WebMvcConfigurer jpaWebMvcConfigurer(
+            PageableArgumentResolver pageableArgumentResolver,
+            SortArgumentResolver sortArgumentResolver) {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+                resolvers.add(pageableArgumentResolver);
+                resolvers.add(sortArgumentResolver);
+            }
+        };
+    }
+
 
 }
