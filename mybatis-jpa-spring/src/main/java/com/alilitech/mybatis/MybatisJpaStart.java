@@ -29,10 +29,7 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StopWatch;
 
@@ -41,12 +38,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * initialize Mybatis Jpa
- * init component highest - 10
  * @author Zhou Xiaoxiang
  * @since 1.0
  */
-@Order(Ordered.HIGHEST_PRECEDENCE)
-public class MybatisJpaStart implements ApplicationListener<ContextRefreshedEvent>, ApplicationContextAware {
+public class MybatisJpaStart implements SmartLifecycle, ApplicationContextAware {
 
     private static final Log log = LogFactory.getLog(MybatisJpaStart.class);
 
@@ -71,8 +66,7 @@ public class MybatisJpaStart implements ApplicationListener<ContextRefreshedEven
     }
 
     @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-
+    public void start() {
         // only execute once
         if(!started.compareAndSet(false, true)) {
             return;
@@ -119,5 +113,20 @@ public class MybatisJpaStart implements ApplicationListener<ContextRefreshedEven
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+    }
+
+    @Override
+    public void stop() {
+
+    }
+
+    @Override
+    public boolean isRunning() {
+        return false;
+    }
+
+    @Override
+    public int getPhase() {
+        return Integer.MAX_VALUE - 2;
     }
 }
