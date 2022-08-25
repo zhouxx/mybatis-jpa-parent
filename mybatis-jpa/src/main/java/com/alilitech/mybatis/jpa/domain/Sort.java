@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.alilitech.mybatis.jpa.domain.Order.DEFAULT_DIRECTION;
+
 /**
  * @author Zhou Xiaoxiang
  * @since 1.0
@@ -39,7 +41,7 @@ public class Sort {
     }
 
     public Sort(String... properties) {
-        this(Order.DEFAULT_DIRECTION, properties);
+        this(DEFAULT_DIRECTION, properties);
     }
 
     public Sort(Direction direction, String... properties) {
@@ -69,6 +71,52 @@ public class Sort {
 
     public boolean hasOrders() {
         return orders != null && !orders.isEmpty();
+    }
+
+    /**
+     * create a new sort
+     * @param properties sorted properties
+     * @return a new sort
+     */
+    public static Sort by(String... properties) {
+        if (properties == null || properties.length == 0) {
+            throw new IllegalArgumentException("You have to provide at least one property to sort by!");
+        }
+        return new Sort(DEFAULT_DIRECTION, Arrays.asList(properties));
+    }
+
+    /**
+     * set the properties sort direction desc
+     * @return Sort
+     */
+    public Sort descending() {
+        return withDirection(Direction.DESC);
+    }
+
+    /**
+     * set the properties sort direction asc
+     * @return Sort
+     */
+    public Sort ascending() {
+        return withDirection(Direction.ASC);
+    }
+
+    /**
+     * merge this sort and those sort
+     * @param sort those sort
+     * @return this sort
+     */
+    public Sort and(Sort sort) {
+        if(sort == null) {
+            return this;
+        }
+        this.orders.addAll(sort.getOrders());
+        return this;
+    }
+
+    private Sort withDirection(Direction direction) {
+        this.orders.forEach(order -> order.setDirection(direction));
+        return this;
     }
 
 }
