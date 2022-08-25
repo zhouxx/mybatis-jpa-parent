@@ -35,6 +35,8 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -87,18 +89,18 @@ public class GeneratorUtils {
 
                     TableColumn tableColumn = new TableColumn();
 
-                    Integer columnType = rs.getInt("DATA_TYPE");
-                    Integer columnSize = rs.getInt("COLUMN_SIZE");
+                    int columnType = rs.getInt("DATA_TYPE");
+                    int columnSize = rs.getInt("COLUMN_SIZE");
                     String columnName = rs.getString("COLUMN_NAME");
                     boolean isNull = rs.getInt("NULLABLE") == DatabaseMetaData.columnNullable;
-                    Integer scale = rs.getInt("DECIMAL_DIGITS");
+                    int scale = rs.getInt("DECIMAL_DIGITS");
                     String remark = rs.getString("REMARKS");
                     String defaultValue = rs.getString("COLUMN_DEF");
                     String isAutoIncrement = rs.getString("IS_AUTOINCREMENT");
 
                     tableColumn.setColumnName(columnName);
                     tableColumn.setColumnSize(columnSize);
-                    tableColumn.setColumnType(covertDomain(columnType));
+                    tableColumn.setColumnType(covertDomain(columnType, columnSize));
                     tableColumn.setDefaultValue(defaultValue);
                     tableColumn.setNullAble(isNull);
                     tableColumn.setPrimary(columnName.equals(pkColumn));
@@ -145,13 +147,14 @@ public class GeneratorUtils {
         return classDefinitions;
     }
 
-    private static Class<?> covertDomain(Integer columnType) {
+    private static Class<?> covertDomain(int columnType, int columnSize) {
 
         switch (columnType) {
-            case Types.DATE :
+            case Types.DATE:
+                return LocalDate.class;
             case Types.TIMESTAMP:
-            case Types.TIME :
-                return java.util.Date.class;
+            case Types.TIME:
+                return LocalDateTime.class;
             case Types.DECIMAL:
             case Types.NUMERIC:
                 return BigDecimal.class;
@@ -163,7 +166,11 @@ public class GeneratorUtils {
             case Types.BIGINT:
                 return Long.class;
             case Types.INTEGER:
+                return Integer.class;
             case Types.TINYINT:
+                if(columnSize == 1) {
+                    return Boolean.class;
+                }
                 return Integer.class;
             case Types.BLOB :
             case Types.NCLOB:
