@@ -44,7 +44,7 @@ public @interface Trigger {
 
     /**
      * force to set the value, whether the value of domain's field is present or null
-     * only support {@link TriggerValueType#DATABASE_FUNCTION}
+     * only support {@link TriggerValueType#JAVA_CODE}
      */
     boolean force() default true;
 

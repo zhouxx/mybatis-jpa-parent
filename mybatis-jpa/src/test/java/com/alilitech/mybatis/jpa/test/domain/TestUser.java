@@ -43,7 +43,10 @@ public class TestUser {
     private Integer age;
 
     //代码触发器
-    @TriggerValue(triggers = @Trigger(triggerType = SqlCommandType.INSERT, valueType = TriggerValueType.JAVA_CODE, valueClass = CommonUtil.class, methodName = "getCurrentDate"))
+    @TriggerValue(triggers = {
+            @Trigger(triggerType = SqlCommandType.INSERT, valueType = TriggerValueType.JAVA_CODE, valueClass = CommonUtil.class, methodName = "getCurrentDate"),
+            @Trigger(triggerType = SqlCommandType.UPDATE, valueType = TriggerValueType.JAVA_CODE, valueClass = CommonUtil.class, methodName = "getCurrentDate", force = false)
+    })
     //自定义数据库字段
     @Column(name = "createTime")
     private Date createTime;
@@ -58,7 +61,7 @@ public class TestUser {
             predicates = @SubQuery.Predicate(property = "deptNo",condition = "> '0'"),
             orders = @SubQuery.Order(property = "deptNo"))
     //哪些方法关联演示
-    @MappedStatement(exclude = {"findPageSpecification", "findSpecification"})
+    @MappedStatement(exclude = {"findPageSpecification", "findAllSpecification"})
     private TestDept dept;
 
     //哪些方法关联演示

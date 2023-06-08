@@ -16,6 +16,7 @@
 package com.alilitech.mybatis.jpa.parameter;
 
 import com.alilitech.mybatis.jpa.EntityMetaDataRegistry;
+import com.alilitech.mybatis.jpa.criteria.Specification;
 import com.alilitech.mybatis.jpa.meta.EntityMetaData;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
@@ -40,6 +41,10 @@ public class TriggerValue4NoKeyGenerator extends NoKeyGenerator {
     public void processBefore(Executor executor, MappedStatement mappedStatement, Statement stmt, Object parameterObject) {
 
         if (!(mappedStatement.getSqlCommandType() == SqlCommandType.INSERT || mappedStatement.getSqlCommandType() == SqlCommandType.UPDATE)) {
+            return;
+        }
+
+        if(parameterObject instanceof Specification) {
             return;
         }
 

@@ -144,4 +144,8 @@ public class CriteriaBuilder<T> {
         VariableExpression<T> variable = new VariableExpression<>(domainClass, property);
         return new OrderExpression<>(variable, Direction.ASC);
     }
+
+    public SetExpression<T> set(String property, Object value) {
+        return new SetExpression<>(new VariableExpression<>(domainClass, property), new ParameterExpression<>(value));
+    }
 }

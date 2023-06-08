@@ -100,6 +100,10 @@ public class Page<T> extends Pagination<T> {
         return page > 0;
     }
 
+    public static <T> Page<T> of(Integer page, Integer size) {
+        return new Page<>(page, size);
+    }
+
     public static <T> Page<T> get() {
         return new Page<>();
     }

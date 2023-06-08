@@ -43,7 +43,7 @@ import java.util.Map;
  */
 public class ParameterAssistant {
 
-    private final Log log = LogFactory.getLog(ParameterAssistant.class);
+    private static final Log log = LogFactory.getLog(ParameterAssistant.class);
 
     public Collection<Object> getParameters(Object parameter) {
         Collection<Object> parameters = null;
@@ -118,12 +118,7 @@ public class ParameterAssistant {
                 if(trigger.triggerType() == mappedStatement.getSqlCommandType()
                         && trigger.valueType() == TriggerValueType.JAVA_CODE)
                     if (metaObject.getValue(columnMetaData.getProperty()) == null || trigger.force()) {
-                        Object obj = null;
-                        try {
-                            obj = trigger.valueClass().getMethod(trigger.methodName()).invoke(trigger.valueClass().newInstance());
-                        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | InstantiationException e) {
-                            log.error(columnMetaData.getProperty() + " trigger failed, check your trigger method: " + trigger.valueClass().getName() + "." + trigger.methodName(), e);
-                        }
+                        Object obj = getTriggerValue(columnMetaData, trigger);
                         metaObject.setValue(columnMetaData.getProperty(), obj);
                     }
             }
@@ -131,4 +126,28 @@ public class ParameterAssistant {
 
         return metaObject.getOriginalObject();
     }
+
+
+    public static Object getTriggerValue(ColumnMetaData columnMetaData, Trigger trigger) {
+        Object obj = null;
+        try {
+            obj = trigger.valueClass().getMethod(trigger.methodName()).invoke(trigger.valueClass().newInstance());
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | InstantiationException e) {
+            log.error(columnMetaData.getProperty() + " trigger failed, check your trigger method: " + trigger.valueClass().getName() + "." + trigger.methodName(), e);
+        }
+        return obj;
+    }
+
+    public static Trigger getTrigger(ColumnMetaData columnMeta, SqlCommandType sqlCommandType) {
+        if(columnMeta.getTriggers() != null) {
+            for(Trigger trigger : columnMeta.getTriggers()) {
+                if(trigger.triggerType() == sqlCommandType && trigger.valueType() == TriggerValueType.JAVA_CODE) {
+                    return trigger;
+                }
+            }
+        }
+        return null;
+    }
+
+
 }

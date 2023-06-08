@@ -16,6 +16,7 @@
 package com.alilitech.mybatis.jpa.definition;
 
 import com.alilitech.mybatis.jpa.anotation.IfTest;
+import com.alilitech.mybatis.jpa.criteria.SpecificationType;
 import com.alilitech.mybatis.jpa.exception.ParameterNumberNotMatchException;
 import com.alilitech.mybatis.jpa.statement.parser.PartTree;
 
@@ -63,6 +64,8 @@ public class MethodDefinition {
 
     //是否是specification查询
     private boolean specification;
+
+    private SpecificationType specificationType;
 
     //此方法需要关联查询的部分，可以有多个关联
     private List<JoinStatementDefinition> joinStatementDefinitions = new ArrayList<>();
@@ -199,6 +202,14 @@ public class MethodDefinition {
         this.specification = specification;
     }
 
+    public SpecificationType getSpecificationType() {
+        return specificationType;
+    }
+
+    public void setSpecificationType(SpecificationType specificationType) {
+        this.specificationType = specificationType;
+    }
+
     public List<JoinStatementDefinition> getJoinStatementDefinitions() {
         return joinStatementDefinitions;
     }
@@ -253,6 +264,7 @@ public class MethodDefinition {
 
             if(parameterDefinition.isSpecification()) {
                 specification = true;
+                specificationType = parameterDefinition.getSpecificationType();
             }
 
             count++;

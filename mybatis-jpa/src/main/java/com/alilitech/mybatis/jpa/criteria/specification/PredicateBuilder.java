@@ -18,7 +18,6 @@ package com.alilitech.mybatis.jpa.criteria.specification;
 import com.alilitech.mybatis.jpa.criteria.CriteriaBuilder;
 import com.alilitech.mybatis.jpa.criteria.CriteriaQuery;
 import com.alilitech.mybatis.jpa.criteria.expression.PredicateExpression;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +29,7 @@ import java.util.function.Consumer;
  */
 public class PredicateBuilder<T> extends AbstractSpecificationBuilder<T> {
 
-    protected PredicateExpression.BooleanOperator operator;
+    protected PredicateExpression.BooleanOperator operator = PredicateExpression.BooleanOperator.AND;
 
     protected List<PredicateExpression<T>> predicates = new ArrayList<>();
 
@@ -245,14 +244,15 @@ public class PredicateBuilder<T> extends AbstractSpecificationBuilder<T> {
     }
 
     @Override
-    public void build(CriteriaBuilder cb, CriteriaQuery query) {
+    public void build(CriteriaBuilder<T> cb, CriteriaQuery<T> query) {
+        specificationBuilder.build(cb, query);
         for (int i = 0; i < specifications.size(); i++) {
             PredicateExpression<T> predicateExpression = specifications.get(i).toPredicate(cb, query);
             if(predicateExpression != null) {
                 this.predicates.add(predicateExpression);
             }
         }
-        if (!CollectionUtils.isEmpty(predicates)) {
+        if (predicates != null && !predicates.isEmpty()) {
             if(PredicateExpression.BooleanOperator.OR.equals(operator)) {
                 query.where(cb.or(predicates.toArray(new PredicateExpression[predicates.size()])));
             } else {

@@ -15,11 +15,19 @@
  */
 package com.alilitech.mybatis.jpa.criteria;
 
-import com.alilitech.mybatis.jpa.criteria.expression.CompoundPredicateExpression;
-import com.alilitech.mybatis.jpa.criteria.expression.OrderExpression;
-import com.alilitech.mybatis.jpa.criteria.expression.PredicateExpression;
+import com.alilitech.mybatis.jpa.EntityMetaDataRegistry;
+import com.alilitech.mybatis.jpa.anotation.Trigger;
+import com.alilitech.mybatis.jpa.criteria.expression.*;
+import com.alilitech.mybatis.jpa.meta.ColumnMetaData;
+import com.alilitech.mybatis.jpa.meta.EntityMetaData;
+import com.alilitech.mybatis.jpa.parameter.TriggerValueType;
+import com.alilitech.mybatis.jpa.statement.StatementAssistant;
+import org.apache.ibatis.mapping.SqlCommandType;
+import org.apache.ibatis.parsing.GenericTokenParser;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Zhou Xiaoxiang
@@ -27,9 +35,13 @@ import java.util.Map;
  */
 public class CriteriaQuery<T> {
 
+    private final Class<T> returnType;
+
     private PredicateExpression.BooleanOperator booleanOperator = PredicateExpression.BooleanOperator.AND;
 
     private final RenderContext renderContext = new RenderContext();
+
+    private String setScript;
 
     private String whereScript;
 
@@ -38,11 +50,67 @@ public class CriteriaQuery<T> {
     private String orderByScript;
 
     public CriteriaQuery(Class<T> returnType) {
+        this.returnType = returnType;
     }
 
     public CriteriaQuery(Class<T> returnType, PredicateExpression.BooleanOperator booleanOperator) {
         this(returnType);
         this.booleanOperator = booleanOperator;
+    }
+
+    public CriteriaQuery<T> update(SetExpression<T>... setExpressions) {
+        // 保存用户设置的更新列名
+        Set<String> setColumnNames = new HashSet<>();
+
+        EntityMetaData entityMetaData = EntityMetaDataRegistry.getInstance().get(returnType);
+
+        String split = ", ";
+        if(setExpressions != null) {
+            for (SetExpression<T> setExpression : setExpressions) {
+                // 有触发器，
+                // 当valueType=databaseFunction时，忽略set
+                // 当valueType=javaCode时，并且force=true,忽略此set
+                ColumnMetaData columnMetaData = entityMetaData.getColumnMetaDataMap().get(setExpression.getVariable().getOriginalVariableName());
+                Trigger codeTrigger = StatementAssistant.getTrigger(columnMetaData, SqlCommandType.UPDATE);
+                if(codeTrigger != null && codeTrigger.valueType() == TriggerValueType.DATABASE_FUNCTION) {
+                    continue;
+                }
+
+                if(codeTrigger != null && codeTrigger.valueType() == TriggerValueType.JAVA_CODE && codeTrigger.force()) {
+                    continue;
+                }
+
+                setExpression.render(renderContext);
+                renderContext.renderString(split);
+
+                setColumnNames.add(setExpression.getVariable().getOriginalVariableName());
+            }
+        }
+
+        // 设置数据库函数的触发器
+        // 设置代码级触发器，预留位置
+        for (ColumnMetaData columnMetaData : entityMetaData.getColumnMetaDataMap().values()) {
+            String function = StatementAssistant.resolveSqlParameterByDatabaseFunction(columnMetaData, SqlCommandType.UPDATE);
+            if(function != null) {
+                renderContext.renderString(columnMetaData.getColumnName());
+                renderContext.renderString(" = ");
+                renderContext.renderString(function);
+                renderContext.renderString(split);
+                continue;
+            }
+
+            Trigger codeTrigger = StatementAssistant.getJavaCodeTrigger(columnMetaData, SqlCommandType.UPDATE);
+            // 有触发器，并且前面没有设置set
+            if(codeTrigger != null && !setColumnNames.contains(columnMetaData.getProperty())) {
+                SetExpression<T> setExpression = new SetExpression<>(new VariableExpression<>(returnType, columnMetaData.getProperty()), new ParameterExpression<>("@{" + columnMetaData.getProperty() + "}"));
+                setExpression.render(renderContext);
+                renderContext.renderString(split);
+            }
+        }
+
+        setScript = renderContext.getScript();
+        renderContext.clearScript();
+        return this;
     }
 
     public CriteriaQuery<T> where(PredicateExpression ... predicateExpressions) {
@@ -67,6 +135,10 @@ public class CriteriaQuery<T> {
         return this;
     }
 
+    public String getSetScript() {
+        return setScript;
+    }
+
     public String getWhereScript() {
         return whereScript;
     }
@@ -77,5 +149,12 @@ public class CriteriaQuery<T> {
 
     public String getOrderByScript() {
         return orderByScript;
+    }
+
+    public static void main(String[] args) {
+        String s = "@{abc}";
+
+        String parse = new GenericTokenParser("@{", "}", content -> content).parse(s);
+        System.out.println(parse);
     }
 }

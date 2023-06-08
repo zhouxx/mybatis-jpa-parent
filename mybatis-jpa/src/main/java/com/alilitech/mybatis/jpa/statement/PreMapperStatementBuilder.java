@@ -40,10 +40,10 @@ import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.mapping.*;
 import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
-import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -181,11 +181,12 @@ public abstract class PreMapperStatementBuilder extends BaseBuilder {
      * build mybatis script
      */
     protected String buildScript(List<String> sqlParts) {
-        StringBuilder script = new StringBuilder()
-                .append("<script>")
-                .append(StringUtils.collectionToDelimitedString(sqlParts, " "))
-                .append("</script>");
-        return script.toString();
+        return sqlParts.stream().collect(Collectors.joining(" ", "<script>", "</script>"));
+//        StringBuilder script = new StringBuilder()
+//                .append("<script>")
+//                .append(StringUtils.collectionToDelimitedString(sqlParts, " "))
+//                .append("</script>");
+//        return script.toString();
     }
 
     /**

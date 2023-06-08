@@ -18,6 +18,7 @@ package com.alilitech.mybatis.jpa.criteria.specification;
 import com.alilitech.mybatis.jpa.criteria.CriteriaBuilder;
 import com.alilitech.mybatis.jpa.criteria.CriteriaQuery;
 import com.alilitech.mybatis.jpa.criteria.Specification;
+import com.alilitech.mybatis.jpa.criteria.UpdateSpecification;
 
 /**
  * @author Zhou Xiaoxiang
@@ -26,6 +27,10 @@ import com.alilitech.mybatis.jpa.criteria.Specification;
 
 public interface SpecificationBuilder<T> {
 
+    default PredicateBuilder<T> where() {
+        return new PredicateBuilder<>(this);
+    }
+
     default OrderBuilder<T> order() {
         return new OrderBuilder<>(this);
     }
@@ -33,6 +38,13 @@ public interface SpecificationBuilder<T> {
     void build(CriteriaBuilder<T> cb, CriteriaQuery<T> query);
 
     default Specification<T> build() {
+        return (cb, query) -> {
+            this.build(cb, query);
+            return null;
+        };
+    }
+
+    default UpdateSpecification<T> buildUpdate() {
         return (cb, query) -> {
             this.build(cb, query);
             return null;

@@ -16,6 +16,7 @@
 package com.alilitech.mybatis.jpa.statement;
 
 import com.alilitech.mybatis.jpa.anotation.Trigger;
+import com.alilitech.mybatis.jpa.criteria.SpecificationType;
 import com.alilitech.mybatis.jpa.definition.MethodDefinition;
 import com.alilitech.mybatis.jpa.meta.ColumnMetaData;
 import com.alilitech.mybatis.jpa.parameter.TriggerValueType;
@@ -93,8 +94,12 @@ public class StatementAssistant {
 			return MethodType.EXISTS_BY_ID;
 		}
 
-		if (definition.isSpecification()) {
+		if (definition.isSpecification() && definition.getSpecificationType() == SpecificationType.SELECT) {
 			return MethodType.FIND_SPECIFICATION;
+		}
+
+		if (definition.isSpecification() && definition.getSpecificationType() == SpecificationType.UPDATE) {
+			return MethodType.UPDATE_SPECIFICATION;
 		}
 
 		// 其它
@@ -113,6 +118,42 @@ public class StatementAssistant {
 			}
 		}
 		return resolveSqlParameter(columnMeta, alias);
+	}
+
+	public static Trigger getTrigger(ColumnMetaData columnMeta, SqlCommandType sqlCommandType) {
+		if(columnMeta.getTriggers() != null) {
+			for(Trigger trigger : columnMeta.getTriggers()) {
+				if(trigger.triggerType() == sqlCommandType) {
+					return trigger;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * 解析系统函数，updateSpecification需要
+	 */
+	public static String resolveSqlParameterByDatabaseFunction(ColumnMetaData columnMeta, SqlCommandType sqlCommandType) {
+		if(columnMeta.getTriggers() != null) {
+			for(Trigger trigger : columnMeta.getTriggers()) {
+				if(trigger.triggerType() == sqlCommandType && trigger.valueType() == TriggerValueType.DATABASE_FUNCTION) {
+					return trigger.value();
+				}
+			}
+		}
+		return null;
+	}
+
+	public static Trigger getJavaCodeTrigger(ColumnMetaData columnMeta, SqlCommandType sqlCommandType) {
+		if(columnMeta.getTriggers() != null) {
+			for(Trigger trigger : columnMeta.getTriggers()) {
+				if(trigger.triggerType() == sqlCommandType && trigger.valueType() == TriggerValueType.JAVA_CODE) {
+					return trigger;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**

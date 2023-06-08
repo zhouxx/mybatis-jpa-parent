@@ -17,9 +17,11 @@ package com.alilitech.mybatis.jpa.mapper;
 
 import com.alilitech.mybatis.jpa.anotation.NoMapperBean;
 import com.alilitech.mybatis.jpa.criteria.Specification;
+import com.alilitech.mybatis.jpa.criteria.UpdateSpecification;
 import com.alilitech.mybatis.jpa.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Zhou Xiaoxiang
@@ -28,8 +30,11 @@ import java.util.List;
 @NoMapperBean
 public interface SpecificationMapper<T, ID> extends Mapper<T, ID> {
 
-    List<T> findSpecification(Specification<T> specification);
+    Optional<T> findOneSpecification(Specification<T> specification);
+
+    List<T> findAllSpecification(Specification<T> specification);
 
     List<T> findPageSpecification(Pageable<T> pageable, Specification<T> specification);
 
+    int updateSpecification(UpdateSpecification<T> specification);
 }

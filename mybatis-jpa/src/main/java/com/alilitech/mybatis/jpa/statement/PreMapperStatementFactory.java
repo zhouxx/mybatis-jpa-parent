@@ -64,6 +64,7 @@ public class PreMapperStatementFactory {
                     preMapperStatementFactory.registerPreMapperStatementBuilder(MethodType.INSERT_SELECTIVE, PreMapperStatementBuilder4InsertSelective.class);
                     preMapperStatementFactory.registerPreMapperStatementBuilder(MethodType.UPDATE, PreMapperStatementBuilder4Update.class);
                     preMapperStatementFactory.registerPreMapperStatementBuilder(MethodType.UPDATE_SELECTIVE, PreMapperStatementBuilder4UpdateSelective.class);
+                    preMapperStatementFactory.registerPreMapperStatementBuilder(MethodType.UPDATE_SPECIFICATION, PreMapperStatementBuilder4UpdateSpecification.class);
                     preMapperStatementFactory.registerPreMapperStatementBuilder(MethodType.DELETE_BY_ID, PreMapperStatementBuilder4DeleteById.class);
                     preMapperStatementFactory.registerPreMapperStatementBuilder(MethodType.INSERT_BATCH, PreMapperStatementBuilder4InsertBatch.class);
                     preMapperStatementFactory.registerPreMapperStatementBuilder(MethodType.UPDATE_BATCH, PreMapperStatementBuilder4UpdateBatch.class);

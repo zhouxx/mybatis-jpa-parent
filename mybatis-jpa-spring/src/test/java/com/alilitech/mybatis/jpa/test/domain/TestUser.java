@@ -58,7 +58,7 @@ public class TestUser {
             predicates = @SubQuery.Predicate(property = "deptNo",condition = "> '0'"),
             orders = @SubQuery.Order(property = "deptNo"))
     //哪些方法关联演示
-    @MappedStatement(exclude = {"findPageSpecification", "findSpecification"})
+    @MappedStatement(exclude = {"findPageSpecification", "findAllSpecification"})
     private TestDept dept;
 
 //    @Column(name = "remark1")

@@ -158,7 +158,7 @@ public class JpaTest {
 
         //代码构建，只需要传入{@link Specification}对象
         //WHERE ( dept_no = ? AND ( age > ? AND name like ?) ) order by name ASC
-        List<TestUser> testUsers = testUserMapper.findSpecification(Specifications.<TestUser>and()
+        List<TestUser> testUsers = testUserMapper.findAllSpecification(Specifications.<TestUser>and()
                 .equal("deptNo", "002")
                 .nested(builder -> {
                     builder.and()

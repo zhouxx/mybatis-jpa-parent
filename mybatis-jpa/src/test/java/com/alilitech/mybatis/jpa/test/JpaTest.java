@@ -16,6 +16,9 @@
 package com.alilitech.mybatis.jpa.test;
 
 
+import com.alilitech.mybatis.jpa.criteria.Specification;
+import com.alilitech.mybatis.jpa.criteria.UpdateSpecification;
+import com.alilitech.mybatis.jpa.criteria.expression.PredicateExpression;
 import com.alilitech.mybatis.jpa.test.domain.TestDept;
 import com.alilitech.mybatis.jpa.test.domain.TestUser;
 import com.alilitech.mybatis.MybatisJpaBootstrap;
@@ -37,6 +40,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -170,7 +174,7 @@ public class JpaTest {
 
         //代码构建，只需要传入{@link Specification}对象
         //WHERE ( dept_no = ? AND ( age > ? AND name like ?) ) order by name ASC
-        List<TestUser> testUsers = testUserMapper.findSpecification(Specifications.<TestUser>and()
+        List<TestUser> testUsers = testUserMapper.findAllSpecification(Specifications.<TestUser>and()
                 .equal("deptNo", "002")
                 .nested(builder -> {
                     builder.and()
@@ -182,9 +186,7 @@ public class JpaTest {
         System.out.println(testUsers);
 
         //同样传入page参数，即可分页
-        Page page = new Page();
-        page.setPage(1);
-        page.setSize(2);
+        Page page = new Page(1, 2);
 
         testUsers = testUserMapper.findPageSpecification(page, Specifications.<TestUser>and()
                 .equal("deptNo", "002")
@@ -197,6 +199,23 @@ public class JpaTest {
                 .order().asc("name").build());
 
         System.out.println(testUsers);
+
+        UpdateSpecification<TestUser> updateSpecification = Specifications.<TestUser>update()
+                .set("name", "jack4")
+                .set("createTime", new Date(System.currentTimeMillis()-10000000000L))
+                .where()
+                .equal("name", "jack3")
+                .buildUpdate();
+
+        testUserMapper.updateSpecification(updateSpecification);
+
+        testUserMapper.updateSpecification((cb, query) -> {
+            PredicateExpression expression = cb.and(cb.in("deptNo", "002", "003"), cb.isNull("createTime"));
+            PredicateExpression expression1 = cb.or(cb.lessThan("age", 18), expression);
+            query.where(cb.equal("name", "Jack"), expression1);
+            query.update(cb.set("name", "jack5"), cb.set("createTime", new Date(System.currentTimeMillis()-10000000000L)));
+            return null;
+        });
     }
 
     /**

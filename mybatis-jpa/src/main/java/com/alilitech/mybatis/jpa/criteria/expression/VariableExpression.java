@@ -26,12 +26,14 @@ import com.alilitech.mybatis.jpa.meta.EntityMetaData;
  */
 public class VariableExpression<T> implements AtomicExpression<T> {
 
+    private String originalVariableName;
     private String variableName;
 
     public VariableExpression() {
     }
 
     public VariableExpression(Class<T> domainClass, String variableName) {
+        this.originalVariableName = variableName;
         this.setVariableName(domainClass, variableName);
     }
 
@@ -46,5 +48,9 @@ public class VariableExpression<T> implements AtomicExpression<T> {
     @Override
     public void render(RenderContext renderContext, Expression<T> ...expressions) {
         renderContext.renderString(variableName);
+    }
+
+    public String getOriginalVariableName() {
+        return originalVariableName;
     }
 }

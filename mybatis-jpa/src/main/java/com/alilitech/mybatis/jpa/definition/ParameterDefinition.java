@@ -16,6 +16,7 @@
 package com.alilitech.mybatis.jpa.definition;
 
 import com.alilitech.mybatis.jpa.criteria.Specification;
+import com.alilitech.mybatis.jpa.criteria.SpecificationType;
 import com.alilitech.mybatis.jpa.domain.Sort;
 import org.apache.ibatis.session.RowBounds;
 
@@ -96,6 +97,10 @@ public class ParameterDefinition {
 
     public boolean isSpecification() {
         return Specification.class.isAssignableFrom(parameterClass);
+    }
+
+    public SpecificationType getSpecificationType() {
+        return SpecificationType.fromClass(parameterClass);
     }
 
     public boolean isSort() {

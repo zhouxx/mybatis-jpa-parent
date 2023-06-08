@@ -20,7 +20,6 @@ import com.alilitech.mybatis.jpa.criteria.CriteriaQuery;
 import com.alilitech.mybatis.jpa.criteria.expression.OrderExpression;
 import com.alilitech.mybatis.jpa.domain.Direction;
 import com.alilitech.mybatis.jpa.domain.Order;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,10 +72,11 @@ public class OrderBuilder<T> extends AbstractSpecificationBuilder<T> {
     @Override
     public void build(CriteriaBuilder cb, CriteriaQuery query) {
         specificationBuilder.build(cb, query);
+        // 通过调用toPredicate, 从而达到填充orderExpressions的目的
         for (int i = 0; i < specifications.size(); i++) {
             specifications.get(i).toPredicate(cb, query);
         }
-        if (!CollectionUtils.isEmpty(orderExpressions)) {
+        if (orderExpressions != null && !orderExpressions.isEmpty()) {
             query.orderBy(orderExpressions.toArray(new OrderExpression[orderExpressions.size()]));
         }
     }

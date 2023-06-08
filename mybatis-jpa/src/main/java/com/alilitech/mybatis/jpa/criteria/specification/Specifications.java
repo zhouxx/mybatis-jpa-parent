@@ -29,6 +29,10 @@ public class Specifications {
     private Specifications() {
     }
 
+    public static <T> UpdateBuilder<T> update() {
+        return new UpdateBuilder<>((SpecificationBuilder<T>) emptySpecificationBuilder);
+    }
+
     public static <T> PredicateBuilder<T> and() {
         return new PredicateBuilder<>((SpecificationBuilder<T>) emptySpecificationBuilder, AND);
     }

@@ -40,6 +40,8 @@ public enum MethodType {
     FIND_JOIN("findJoin"),
     FIND_SPECIFICATION("findSpecification"),
 
+    UPDATE_SPECIFICATION("updateSpecification"),
+
     OTHER("other");
 
     MethodType(String type) {
