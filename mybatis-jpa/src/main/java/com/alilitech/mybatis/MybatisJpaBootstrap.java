@@ -23,6 +23,7 @@ import com.alilitech.mybatis.jpa.DatabaseTypeRegistry;
 import com.alilitech.mybatis.jpa.JpaInitializer;
 import com.alilitech.mybatis.jpa.pagination.PaginationInterceptor;
 import com.alilitech.mybatis.jpa.parameter.MybatisJpaLanguageDriver;
+import com.alilitech.mybatis.jpa.type.DefaultEnumTypeHandler;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 import org.apache.ibatis.mapping.VendorDatabaseIdProvider;
@@ -97,6 +98,8 @@ public class MybatisJpaBootstrap {
         } else {
             configuration.addInterceptor(new PaginationInterceptor(mybatisJpaProperties));
         }
+
+        configuration.setDefaultEnumTypeHandler(DefaultEnumTypeHandler.class);
 
         JpaInitializer jpaInitializer = new JpaInitializer(configuration);
         jpaInitializer.buildJoinMetaDataAndRelationMethodDefinition().invokeJpaMapperStatementBuilder();

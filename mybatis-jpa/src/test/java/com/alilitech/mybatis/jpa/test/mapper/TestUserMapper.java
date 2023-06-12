@@ -1,5 +1,6 @@
 package com.alilitech.mybatis.jpa.test.mapper;
 
+import com.alilitech.mybatis.jpa.test.domain.Sex;
 import com.alilitech.mybatis.jpa.test.domain.TestUser;
 import com.alilitech.mybatis.jpa.anotation.IfTest;
 import com.alilitech.mybatis.jpa.criteria.Specification;
@@ -40,6 +41,8 @@ public interface TestUserMapper extends CrudMapper<TestUser, String>, PageMapper
     Integer countByNameAndDeptNo(String name, String deptNo);
 
     Boolean existsByNameAndDeptNo(String name, String deptNo);
+
+    List<TestUser> findBySex(Sex sex);
 
     int deleteByNameAndDeptNo(String name, String deptNo);
 

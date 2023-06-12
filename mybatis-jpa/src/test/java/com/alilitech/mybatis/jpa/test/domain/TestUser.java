@@ -38,7 +38,7 @@ public class TestUser {
 
     private String name;
 
-    private Integer sex;
+    private Sex sex;
 
     private Integer age;
 
@@ -80,7 +80,7 @@ public class TestUser {
     public TestUser() {
     }
 
-    public TestUser(String id, String name, Integer sex, Integer age, String deptNo) {
+    public TestUser(String id, String name, Sex sex, Integer age, String deptNo) {
         this.id = id;
         this.name = name;
         this.sex = sex;
@@ -104,11 +104,11 @@ public class TestUser {
         this.name = name;
     }
 
-    public Integer getSex() {
+    public Sex getSex() {
         return sex;
     }
 
-    public void setSex(Integer sex) {
+    public void setSex(Sex sex) {
         this.sex = sex;
     }
 
