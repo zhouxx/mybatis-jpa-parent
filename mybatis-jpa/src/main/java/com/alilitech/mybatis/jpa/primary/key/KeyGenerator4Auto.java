@@ -19,6 +19,7 @@ import com.alilitech.mybatis.jpa.parameter.GenerationType;
 
 /**
  * primary key generator of {@link GenerationType#AUTO}
+ *
  * @author Zhou Xiaoxiang
  * @since 1.0
  */

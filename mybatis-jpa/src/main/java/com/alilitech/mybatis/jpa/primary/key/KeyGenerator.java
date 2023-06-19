@@ -17,6 +17,7 @@ package com.alilitech.mybatis.jpa.primary.key;
 
 /**
  * primary key generator
+ *
  * @author Zhou Xiaoxiang
  * @since 1.0
  */

@@ -17,6 +17,7 @@ package com.alilitech.mybatis.jpa.criteria.specification;
 
 import com.alilitech.mybatis.jpa.criteria.CriteriaBuilder;
 import com.alilitech.mybatis.jpa.criteria.CriteriaQuery;
+import com.alilitech.mybatis.jpa.criteria.SerializableFunction;
 import com.alilitech.mybatis.jpa.criteria.expression.OrderExpression;
 import com.alilitech.mybatis.jpa.domain.Direction;
 import com.alilitech.mybatis.jpa.domain.Order;
@@ -44,7 +45,23 @@ public class OrderBuilder<T> extends AbstractSpecificationBuilder<T> {
         return this;
     }
 
+    public <R> OrderBuilder<T> asc(SerializableFunction<T, R> property) {
+        specifications.add((cb, query) -> {
+            orderExpressions.add(cb.asc(property));
+            return null;
+        });
+        return this;
+    }
+
     public OrderBuilder<T> desc(String property) {
+        specifications.add((cb, query) -> {
+            orderExpressions.add(cb.desc(property));
+            return null;
+        });
+        return this;
+    }
+
+    public <R> OrderBuilder<T> desc(SerializableFunction<T, R> property) {
         specifications.add((cb, query) -> {
             orderExpressions.add(cb.desc(property));
             return null;

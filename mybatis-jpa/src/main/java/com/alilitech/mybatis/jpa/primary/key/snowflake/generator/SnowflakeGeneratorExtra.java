@@ -2,9 +2,12 @@ package com.alilitech.mybatis.jpa.primary.key.snowflake.generator;
 
 
 import com.alilitech.mybatis.jpa.primary.key.snowflake.SnowflakeContext;
+import com.alilitech.mybatis.jpa.primary.key.snowflake.TimeCallbackStrategy;
 
 /**
  * 启用备用workerId
+ * see {@link TimeCallbackStrategy#EXTRA}
+ *
  * @author Wang Chengyang
  * @author Zhou Xiaoxiang
  * @since 1.3.1

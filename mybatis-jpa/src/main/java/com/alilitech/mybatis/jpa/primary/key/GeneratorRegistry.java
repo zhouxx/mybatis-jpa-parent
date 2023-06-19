@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Generator Registry
+ *
  * @author Zhou Xiaoxiang
  * @since 1.0
  */

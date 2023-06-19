@@ -23,6 +23,7 @@ import java.lang.annotation.*;
 /**
  * add @IfTest on method or parameter, to generate dynamic sql
  * like <if test="">xxx</if>
+ *
  * @author Zhou Xiaoxiang
  * @since 1.0
  */

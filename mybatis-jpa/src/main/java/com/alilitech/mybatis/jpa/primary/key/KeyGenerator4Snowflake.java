@@ -15,10 +15,12 @@
  */
 package com.alilitech.mybatis.jpa.primary.key;
 
+import com.alilitech.mybatis.jpa.parameter.GenerationType;
 import com.alilitech.mybatis.jpa.primary.key.snowflake.SnowflakeContext;
 import com.alilitech.mybatis.jpa.primary.key.snowflake.generator.SnowflakeGenerator;
 
 /**
+ * primary key generator of {@link GenerationType#SNOWFLAKE}
  *
  * @author Zhou Xiaoxiang
  * @since 1.3.1

@@ -20,8 +20,10 @@ import com.alilitech.mybatis.jpa.criteria.expression.operator.OperatorExpression
 import com.alilitech.mybatis.jpa.criteria.expression.operator.comparison.*;
 import com.alilitech.mybatis.jpa.criteria.expression.operator.like.*;
 import com.alilitech.mybatis.jpa.domain.Direction;
+import org.apache.ibatis.reflection.property.PropertyNamer;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -51,72 +53,144 @@ public class CriteriaBuilder<T> {
         return this.buildPredicate(property, new EqualExpression<>(), value);
     }
 
+    public <R> PredicateExpression<T> equal(SerializableFunction<T, R> propertyFunction, Object value) {
+        return this.equal(getProperty(propertyFunction), value);
+    }
+
     public PredicateExpression<T> notEqual(String property, Object value) {
         return this.buildPredicate(property, new NotEqualExpression<>(), value);
+    }
+
+    public <R> PredicateExpression<T> notEqual(SerializableFunction<T, R> propertyFunction, Object value) {
+        return this.notEqual(getProperty(propertyFunction), value);
     }
 
     public PredicateExpression<T> greaterThan(String property, Object value) {
         return this.buildPredicate(property, new GreaterThanExpression<>(), value);
     }
 
+    public <R> PredicateExpression<T> greaterThan(SerializableFunction<T, R> propertyFunction, Object value) {
+        return this.greaterThan(getProperty(propertyFunction), value);
+    }
+
     public PredicateExpression<T> greaterThanEqual(String property, Object value) {
         return this.buildPredicate(property, new GreaterThanEqualExpression<>(), value);
+    }
+
+    public <R> PredicateExpression<T> greaterThanEqual(SerializableFunction<T, R> propertyFunction, Object value) {
+        return this.greaterThanEqual(getProperty(propertyFunction), value);
     }
 
     public PredicateExpression<T> lessThan(String property, Object value) {
         return this.buildPredicate(property, new LessThanExpression<>(), value);
     }
 
+    public <R> PredicateExpression<T> lessThan(SerializableFunction<T, R> propertyFunction, Object value) {
+        return this.lessThan(getProperty(propertyFunction), value);
+    }
+
     public PredicateExpression<T> lessThanEqual(String property, Object value) {
         return this.buildPredicate(property, new LessThanEqualExpression<>(), value);
+    }
+
+    public <R> PredicateExpression<T> lessThanEqual(SerializableFunction<T, R> propertyFunction, Object value) {
+        return this.lessThanEqual(getProperty(propertyFunction), value);
     }
 
     public PredicateExpression<T> isNull(String property) {
         return this.buildPredicate(property, new IsNullExpression<>());
     }
 
+    public <R> PredicateExpression<T> isNull(SerializableFunction<T, R> propertyFunction) {
+        return this.isNull(getProperty(propertyFunction));
+    }
+
     public PredicateExpression<T> isNotNull(String property) {
         return this.buildPredicate(property, new IsNotNullExpression<>());
+    }
+
+    public <R> PredicateExpression<T> isNotNull(SerializableFunction<T, R> propertyFunction) {
+        return this.isNotNull(getProperty(propertyFunction));
     }
 
     public PredicateExpression<T> between(String property, Object value1, Object value2) {
         return this.buildPredicate(property, new BetweenExpression<>(), value1, value2);
     }
 
+    public <R> PredicateExpression<T> between(SerializableFunction<T, R> propertyFunction, Object value1, Object value2) {
+        return this.between(getProperty(propertyFunction), value1, value2);
+    }
+
     public PredicateExpression<T> notBetween(String property, Object value1, Object value2) {
         return this.buildPredicate(property, new NotBetweenExpression<>(), value1, value2);
+    }
+
+    public <R> PredicateExpression<T> notBetween(SerializableFunction<T, R> propertyFunction, Object value1, Object value2) {
+        return this.notBetween(getProperty(propertyFunction), value1, value2);
     }
 
     public PredicateExpression<T> in(String property, Object ...values) {
         return this.buildPredicate(property, new InExpression<>(), values);
     }
 
-    public PredicateExpression<T> in(String property, List<?> values) {
+    public <R> PredicateExpression<T> in(SerializableFunction<T, R> propertyFunction, Object ...values) {
+        return this.in(getProperty(propertyFunction), values);
+    }
+
+    public PredicateExpression<T> in(String property, Collection<?> values) {
         return this.buildPredicate(property, new InExpression<>(), values.toArray());
+    }
+
+    public <R> PredicateExpression<T> in(SerializableFunction<T, R> propertyFunction, Collection<?> values) {
+        return this.in(getProperty(propertyFunction), values);
     }
 
     public PredicateExpression<T> freeLike(String property, Object value) {
         return this.buildPredicate(property, new FreeLikeExpression<>(), value);
     }
 
+    public <R> PredicateExpression<T> freeLike(SerializableFunction<T, R> propertyFunction, Object value) {
+        return this.freeLike(getProperty(propertyFunction), value);
+    }
+
     public PredicateExpression<T> notFreeLike(String property, Object value) {
         return this.buildPredicate(property, new NotFreeLikeExpression<>(), value);
+    }
+
+    public <R> PredicateExpression<T> notFreeLike(SerializableFunction<T, R> propertyFunction, Object value) {
+        return this.notFreeLike(getProperty(propertyFunction), value);
     }
 
     public PredicateExpression<T> like(String property, Object value) {
         return this.buildPredicate(property, new LikeExpression<>(), value);
     }
 
+    public <R> PredicateExpression<T> like(SerializableFunction<T, R> propertyFunction, Object value) {
+        return this.like(getProperty(propertyFunction), value);
+    }
+
     public PredicateExpression<T> notLike(String property, Object value) {
         return this.buildPredicate(property, new NotLikeExpression<>(), value);
+    }
+
+    public <R> PredicateExpression<T> notLike(SerializableFunction<T, R> propertyFunction, Object value) {
+        return this.notLike(getProperty(propertyFunction), value);
     }
 
     public PredicateExpression<T> startsWith(String property, Object value) {
         return this.buildPredicate(property, new StartsWithExpression<>(), value);
     }
 
+    public <R> PredicateExpression<T> startsWith(SerializableFunction<T, R> propertyFunction, Object value) {
+        return this.startsWith(getProperty(propertyFunction), value);
+    }
+
     public PredicateExpression<T> endsWith(String property, Object value) {
         return this.buildPredicate(property, new EndsWithExpression<>(), value);
+    }
+
+    public <R> PredicateExpression<T> endsWith(SerializableFunction<T, R> propertyFunction, Object value) {
+        return this.endsWith(getProperty(propertyFunction), value);
     }
 
     private PredicateExpression<T> buildPredicate(String property, OperatorExpression<T> operator, Object ...values) {
@@ -129,14 +203,17 @@ public class CriteriaBuilder<T> {
         }
     }
 
-    /**
-    private PredicateExpression<T> buildPredicate(VariableExpression<T> variable, OperatorExpression<T> operator, ParameterExpression<T> ...parameters) {
-        return new SinglePredicateExpression<>(variable, operator, parameters);
+    private String getProperty(SerializableFunction<T, ?> function) {
+        return PropertyNamer.methodToProperty(function.getImplMethodName());
     }
-     */
 
     public OrderExpression<T> desc(String property) {
         VariableExpression<T> variable = new VariableExpression<>(domainClass, property);
+        return new OrderExpression<>(variable, Direction.DESC);
+    }
+
+    public <R> OrderExpression<T> desc(SerializableFunction<T, R> propertyFunction) {
+        VariableExpression<T> variable = new VariableExpression<>(domainClass, getProperty(propertyFunction));
         return new OrderExpression<>(variable, Direction.DESC);
     }
 
@@ -145,7 +222,16 @@ public class CriteriaBuilder<T> {
         return new OrderExpression<>(variable, Direction.ASC);
     }
 
+    public <R> OrderExpression<T> asc(SerializableFunction<T, R> propertyFunction) {
+        VariableExpression<T> variable = new VariableExpression<>(domainClass, getProperty(propertyFunction));
+        return new OrderExpression<>(variable, Direction.ASC);
+    }
+
     public SetExpression<T> set(String property, Object value) {
         return new SetExpression<>(new VariableExpression<>(domainClass, property), new ParameterExpression<>(value));
+    }
+
+    public <R> SetExpression<T> set(SerializableFunction<T, R> propertyFunction, Object value) {
+        return new SetExpression<>(new VariableExpression<>(domainClass, getProperty(propertyFunction)), new ParameterExpression<>(value));
     }
 }

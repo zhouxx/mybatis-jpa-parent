@@ -17,6 +17,7 @@ package com.alilitech.mybatis.jpa.primary.key.snowflake.generator;
 
 import com.alilitech.mybatis.jpa.primary.key.OffsetRepository;
 import com.alilitech.mybatis.jpa.primary.key.snowflake.SnowflakeContext;
+import com.alilitech.mybatis.jpa.primary.key.snowflake.TimeCallbackStrategy;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
 
@@ -25,6 +26,8 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * 削减偏移量
+ * see {@link TimeCallbackStrategy#OFFSET_MODIFY}
+ *
  * @author Zhou Xiaoxiang
  * @since 1.3.1
  */

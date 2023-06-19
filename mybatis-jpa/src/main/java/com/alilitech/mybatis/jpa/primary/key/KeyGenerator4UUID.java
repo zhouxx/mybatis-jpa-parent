@@ -21,6 +21,7 @@ import java.util.UUID;
 
 /**
  * primary key generator of {@link GenerationType#UUID}
+ *
  * @author Zhou Xiaoxiang
  * @since 1.0
  */

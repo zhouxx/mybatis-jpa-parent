@@ -23,6 +23,8 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
+ * used for enum field
+ *
  * @author Zhou Xiaoxiang
  * @since 2.1.1
  */

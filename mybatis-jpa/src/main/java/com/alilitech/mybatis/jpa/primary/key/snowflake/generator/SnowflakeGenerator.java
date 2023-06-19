@@ -18,6 +18,9 @@ package com.alilitech.mybatis.jpa.primary.key.snowflake.generator;
 import com.alilitech.mybatis.jpa.primary.key.snowflake.SnowflakeContext;
 
 /**
+ * Snowflake generator
+ * see {@link SnowflakeGeneratorExtra} {@link SnowflakeGeneratorOffsetModify} {@link SnowflakeGeneratorWaiting}
+ *
  * @author Zhou Xiaoxiang
  * @since 1.3.1
  */

@@ -25,6 +25,7 @@ import org.apache.ibatis.logging.LogFactory;
 
 /**
  * to build snowflake key generator
+ * 
  * @author Zhou Xiaoxiang
  * @since 1.3.2
  */

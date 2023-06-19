@@ -25,6 +25,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 
 /**
+ * {@link Trigger} collections
  *
  * @author Zhou Xiaoxiang
  * @since 1.0

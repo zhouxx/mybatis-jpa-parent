@@ -18,6 +18,7 @@ package com.alilitech.mybatis.jpa.primary.key;
 /**
  * snowflake offset repository
  * when using {@link com.alilitech.mybatis.jpa.primary.key.snowflake.TimeCallbackStrategy#OFFSET_MODIFY} strategy
+ *
  * @author Zhou Xiaoxiang
  * @since 1.3.2
  */

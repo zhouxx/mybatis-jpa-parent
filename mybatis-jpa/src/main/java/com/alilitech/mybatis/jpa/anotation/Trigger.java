@@ -22,7 +22,7 @@ import java.lang.annotation.Documented;
 
 
 /**
- * trigger with code
+ * triggered when {@link SqlCommandType#INSERT} or {@link SqlCommandType#UPDATE}
  * when {@link TriggerValueType#JAVA_CODE} ,invoke the methodName of valueClass to generate the value
  * otherwise {@link TriggerValueType#DATABASE_FUNCTION}, just replace the placeholder with supported value
  *

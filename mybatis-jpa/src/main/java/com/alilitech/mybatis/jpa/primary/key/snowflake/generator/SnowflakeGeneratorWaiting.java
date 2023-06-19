@@ -3,11 +3,13 @@ package com.alilitech.mybatis.jpa.primary.key.snowflake.generator;
 
 import com.alilitech.mybatis.jpa.primary.key.snowflake.SnowFlakeKeyGenerateException;
 import com.alilitech.mybatis.jpa.primary.key.snowflake.SnowflakeContext;
+import com.alilitech.mybatis.jpa.primary.key.snowflake.TimeCallbackStrategy;
 
 import java.util.concurrent.TimeUnit;
 
 /**
  * 强制等待回拨时间
+ * see {@link TimeCallbackStrategy#WAITING}
  *
  * @author Wang Chengyang
  * @author Zhou Xiaoxiang

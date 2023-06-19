@@ -17,9 +17,11 @@ package com.alilitech.mybatis.jpa.criteria.specification;
 
 import com.alilitech.mybatis.jpa.criteria.CriteriaBuilder;
 import com.alilitech.mybatis.jpa.criteria.CriteriaQuery;
+import com.alilitech.mybatis.jpa.criteria.SerializableFunction;
 import com.alilitech.mybatis.jpa.criteria.expression.PredicateExpression;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -27,6 +29,7 @@ import java.util.function.Consumer;
  * @author Zhou Xiaoxiang
  * @since 1.1
  */
+@SuppressWarnings("java:S1221")
 public class PredicateBuilder<T> extends AbstractSpecificationBuilder<T> {
 
     protected PredicateExpression.BooleanOperator operator = PredicateExpression.BooleanOperator.AND;
@@ -42,8 +45,13 @@ public class PredicateBuilder<T> extends AbstractSpecificationBuilder<T> {
         this.operator = operator;
     }
 
-    @SuppressWarnings("java:S1221")
     public PredicateBuilder<T> equal(String property, Object value) {
+        specifications.add((cb, query) -> cb.equal(property, value));
+        return this;
+    }
+
+    @SuppressWarnings("java:S1221")
+    public <R> PredicateBuilder<T> equal(SerializableFunction<T, R> property, Object value) {
         specifications.add((cb, query) -> cb.equal(property, value));
         return this;
     }
@@ -51,7 +59,15 @@ public class PredicateBuilder<T> extends AbstractSpecificationBuilder<T> {
     @SuppressWarnings("java:S1221")
     public PredicateBuilder<T> equal(boolean condition, String property, Object value) {
         if(condition) {
-            specifications.add((cb, query) -> cb.equal(property, value));
+            this.equal(property, value);
+        }
+        return this;
+    }
+
+    @SuppressWarnings("java:S1221")
+    public <R> PredicateBuilder<T> equal(boolean condition, SerializableFunction<T, R> property, Object value) {
+        if(condition) {
+            this.equal(property, value);
         }
         return this;
     }
@@ -61,9 +77,21 @@ public class PredicateBuilder<T> extends AbstractSpecificationBuilder<T> {
         return this;
     }
 
+    public <R> PredicateBuilder<T> notEqual(SerializableFunction<T, R> property, Object value) {
+        specifications.add((cb, query) -> cb.notEqual(property, value));
+        return this;
+    }
+
     public PredicateBuilder<T> notEqual(boolean condition, String property, Object value) {
         if(condition) {
-            specifications.add((cb, query) -> cb.notEqual(property, value));
+            this.notEqual(property, value);
+        }
+        return this;
+    }
+
+    public <R> PredicateBuilder<T> notEqual(boolean condition, SerializableFunction<T, R> property, Object value) {
+        if(condition) {
+            this.notEqual(property, value);
         }
         return this;
     }
@@ -73,9 +101,21 @@ public class PredicateBuilder<T> extends AbstractSpecificationBuilder<T> {
         return this;
     }
 
+    public <R> PredicateBuilder<T> greaterThan(SerializableFunction<T, R> property, Object value) {
+        specifications.add((cb, query) -> cb.greaterThan(property, value));
+        return this;
+    }
+
     public PredicateBuilder<T> greaterThan(boolean condition, String property, Object value) {
         if(condition) {
-            specifications.add((cb, query) -> cb.greaterThan(property, value));
+            this.greaterThan(property, value);
+        }
+        return this;
+    }
+
+    public <R> PredicateBuilder<T> greaterThan(boolean condition, SerializableFunction<T, R> property, Object value) {
+        if(condition) {
+            this.greaterThan(property, value);
         }
         return this;
     }
@@ -85,9 +125,21 @@ public class PredicateBuilder<T> extends AbstractSpecificationBuilder<T> {
         return this;
     }
 
+    public <R> PredicateBuilder<T> greaterThanEqual(SerializableFunction<T, R> property, Object value) {
+        specifications.add((cb, query) -> cb.greaterThanEqual(property, value));
+        return this;
+    }
+
     public PredicateBuilder<T> greaterThanEqual(boolean condition, String property, Object value) {
         if(condition) {
-            specifications.add((cb, query) -> cb.greaterThanEqual(property, value));
+            this.greaterThanEqual(property, value);
+        }
+        return this;
+    }
+
+    public <R> PredicateBuilder<T> greaterThanEqual(boolean condition, SerializableFunction<T, R> property, Object value) {
+        if(condition) {
+            this.greaterThanEqual(property, value);
         }
         return this;
     }
@@ -97,9 +149,21 @@ public class PredicateBuilder<T> extends AbstractSpecificationBuilder<T> {
         return this;
     }
 
+    public <R> PredicateBuilder<T> lessThan(SerializableFunction<T, R> property, Object value) {
+        specifications.add((cb, query) -> cb.lessThan(property, value));
+        return this;
+    }
+
     public PredicateBuilder<T> lessThan(boolean condition, String property, Object value) {
         if(condition) {
-            specifications.add((cb, query) -> cb.lessThan(property, value));
+            this.lessThan(property, value);
+        }
+        return this;
+    }
+
+    public <R> PredicateBuilder<T> lessThan(boolean condition, SerializableFunction<T, R> property, Object value) {
+        if(condition) {
+            this.lessThan(property, value);
         }
         return this;
     }
@@ -109,9 +173,21 @@ public class PredicateBuilder<T> extends AbstractSpecificationBuilder<T> {
         return this;
     }
 
+    public <R> PredicateBuilder<T> lessThanEqual(SerializableFunction<T, R> property, Object value) {
+        specifications.add((cb, query) -> cb.lessThanEqual(property, value));
+        return this;
+    }
+
     public PredicateBuilder<T> lessThanEqual(boolean condition, String property, Object value) {
         if(condition) {
-            specifications.add((cb, query) -> cb.lessThanEqual(property, value));
+            this.lessThanEqual(property, value);
+        }
+        return this;
+    }
+
+    public <R> PredicateBuilder<T> lessThanEqual(boolean condition, SerializableFunction<T, R> property, Object value) {
+        if(condition) {
+            this.lessThanEqual(property, value);
         }
         return this;
     }
@@ -121,9 +197,21 @@ public class PredicateBuilder<T> extends AbstractSpecificationBuilder<T> {
         return this;
     }
 
+    public <R> PredicateBuilder<T> isNull(SerializableFunction<T, R> property) {
+        specifications.add((cb, query) -> cb.isNull(property));
+        return this;
+    }
+
     public PredicateBuilder<T> isNull(boolean condition, String property) {
         if(condition) {
-            specifications.add((cb, query) -> cb.isNull(property));
+            this.isNull(property);
+        }
+        return this;
+    }
+
+    public <R> PredicateBuilder<T> isNull(boolean condition, SerializableFunction<T, R> property) {
+        if(condition) {
+            this.isNull(property);
         }
         return this;
     }
@@ -133,9 +221,21 @@ public class PredicateBuilder<T> extends AbstractSpecificationBuilder<T> {
         return this;
     }
 
+    public <R> PredicateBuilder<T> isNotNull(SerializableFunction<T, R> property) {
+        specifications.add((cb, query) -> cb.isNotNull(property));
+        return this;
+    }
+
     public PredicateBuilder<T> isNotNull(boolean condition, String property) {
         if(condition) {
-            specifications.add((cb, query) -> cb.isNotNull(property));
+            this.isNotNull(property);
+        }
+        return this;
+    }
+
+    public <R> PredicateBuilder<T> isNotNull(boolean condition, SerializableFunction<T, R> property) {
+        if(condition) {
+            this.isNotNull(property);
         }
         return this;
     }
@@ -145,9 +245,21 @@ public class PredicateBuilder<T> extends AbstractSpecificationBuilder<T> {
         return this;
     }
 
+    public <R> PredicateBuilder<T> between(SerializableFunction<T, R> property, Object value1, Object value2) {
+        specifications.add((cb, query) -> cb.between(property, value1, value2));
+        return this;
+    }
+
     public PredicateBuilder<T> between(boolean condition, String property, Object value1, Object value2) {
         if(condition) {
-            specifications.add((cb, query) -> cb.between(property, value1, value2));
+            this.between(property, value1, value2);
+        }
+        return this;
+    }
+
+    public <R> PredicateBuilder<T> between(boolean condition, SerializableFunction<T, R> property, Object value1, Object value2) {
+        if(condition) {
+            this.between(property, value1, value2);
         }
         return this;
     }
@@ -157,9 +269,21 @@ public class PredicateBuilder<T> extends AbstractSpecificationBuilder<T> {
         return this;
     }
 
+    public <R> PredicateBuilder<T> notBetween(SerializableFunction<T, R> property, Object value1, Object value2) {
+        specifications.add((cb, query) -> cb.notBetween(property, value1, value2));
+        return this;
+    }
+
     public PredicateBuilder<T> notBetween(boolean condition, String property, Object value1, Object value2) {
         if(condition) {
-            specifications.add((cb, query) -> cb.notBetween(property, value1, value2));
+            this.notBetween(property, value1, value2);
+        }
+        return this;
+    }
+
+    public <R> PredicateBuilder<T> notBetween(boolean condition, SerializableFunction<T, R> property, Object value1, Object value2) {
+        if(condition) {
+            this.notBetween(property, value1, value2);
         }
         return this;
     }
@@ -169,21 +293,45 @@ public class PredicateBuilder<T> extends AbstractSpecificationBuilder<T> {
         return this;
     }
 
-    public PredicateBuilder<T> in(boolean condition, String property, Object ...values) {
-        if(condition) {
-            specifications.add((cb, query) -> cb.in(property, values));
-        }
-        return this;
-    }
-
-    public PredicateBuilder<T> in(String property, List<?> values) {
+    public <R> PredicateBuilder<T> in(SerializableFunction<T, R> property, Object ...values) {
         specifications.add((cb, query) -> cb.in(property, values));
         return this;
     }
 
-    public PredicateBuilder<T> in(boolean condition, String property, List<?> values) {
+    public PredicateBuilder<T> in(boolean condition, String property, Object ...values) {
         if(condition) {
-            specifications.add((cb, query) -> cb.in(property, values));
+            this.in(property, values);
+        }
+        return this;
+    }
+
+    public <R> PredicateBuilder<T> in(boolean condition, SerializableFunction<T, R> property, Object ...values) {
+        if(condition) {
+            this.in(property, values);
+        }
+        return this;
+    }
+
+    public PredicateBuilder<T> in(String property, Collection<?> values) {
+        specifications.add((cb, query) -> cb.in(property, values));
+        return this;
+    }
+
+    public <R> PredicateBuilder<T> in(SerializableFunction<T, R> property, Collection<?> values) {
+        specifications.add((cb, query) -> cb.in(property, values));
+        return this;
+    }
+
+    public PredicateBuilder<T> in(boolean condition, String property, Collection<?> values) {
+        if(condition) {
+            this.in(property, values);
+        }
+        return this;
+    }
+
+    public <R> PredicateBuilder<T> in(boolean condition, SerializableFunction<T, R> property, Collection<?> values) {
+        if(condition) {
+            this.in(property, values);
         }
         return this;
     }
@@ -193,9 +341,21 @@ public class PredicateBuilder<T> extends AbstractSpecificationBuilder<T> {
         return this;
     }
 
+    public <R> PredicateBuilder<T> freeLike(SerializableFunction<T, R> property, Object value) {
+        specifications.add((cb, query) -> cb.freeLike(property, value));
+        return this;
+    }
+
     public PredicateBuilder<T> freeLike(boolean condition, String property, Object value) {
         if(condition) {
-            specifications.add((cb, query) -> cb.freeLike(property, value));
+            this.freeLike(property, value);
+        }
+        return this;
+    }
+
+    public <R> PredicateBuilder<T> freeLike(boolean condition, SerializableFunction<T, R> property, Object value) {
+        if(condition) {
+            this.freeLike(property, value);
         }
         return this;
     }
@@ -205,9 +365,21 @@ public class PredicateBuilder<T> extends AbstractSpecificationBuilder<T> {
         return this;
     }
 
+    public <R> PredicateBuilder<T> like(SerializableFunction<T, R> property, Object value) {
+        specifications.add((cb, query) -> cb.like(property, value));
+        return this;
+    }
+
     public PredicateBuilder<T> like(boolean condition, String property, Object value) {
         if(condition) {
-            specifications.add((cb, query) -> cb.like(property, value));
+            this.like(property, value);
+        }
+        return this;
+    }
+
+    public <R> PredicateBuilder<T> like(boolean condition, SerializableFunction<T, R> property, Object value) {
+        if(condition) {
+            this.like(property, value);
         }
         return this;
     }
@@ -217,9 +389,21 @@ public class PredicateBuilder<T> extends AbstractSpecificationBuilder<T> {
         return this;
     }
 
+    public <R> PredicateBuilder<T> startsWith(SerializableFunction<T, R> property, Object value) {
+        specifications.add((cb, query) -> cb.startsWith(property, value));
+        return this;
+    }
+
     public PredicateBuilder<T> startsWith(boolean condition, String property, Object value) {
         if(condition) {
-            specifications.add((cb, query) -> cb.startsWith(property, value));
+           this.startsWith(property, value);
+        }
+        return this;
+    }
+
+    public <R> PredicateBuilder<T> startsWith(boolean condition, SerializableFunction<T, R> property, Object value) {
+        if(condition) {
+            this.startsWith(property, value);
         }
         return this;
     }
@@ -229,9 +413,21 @@ public class PredicateBuilder<T> extends AbstractSpecificationBuilder<T> {
         return this;
     }
 
+    public <R> PredicateBuilder<T> endsWith(SerializableFunction<T, R> property, Object value) {
+        specifications.add((cb, query) -> cb.endsWith(property, value));
+        return this;
+    }
+
     public PredicateBuilder<T> endsWith(boolean condition, String property, Object value) {
         if(condition) {
-            specifications.add((cb, query) -> cb.endsWith(property, value));
+            this.endsWith(property, value);
+        }
+        return this;
+    }
+
+    public <R> PredicateBuilder<T> endsWith(boolean condition, SerializableFunction<T, R> property, Object value) {
+        if(condition) {
+            this.endsWith(property, value);
         }
         return this;
     }

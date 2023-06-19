@@ -198,21 +198,23 @@ public class JpaTest {
 
         // 仅有排序的代码构建 order by name ASC
         testUsers = testUserMapper.findCustomSpecification(Specifications
-                .order().asc("name").build());
+                .<TestUser>order().asc(TestUser::getName).build());
 
         System.out.println(testUsers);
 
+        // 自定义更新
         UpdateSpecification<TestUser> updateSpecification = Specifications.<TestUser>update()
-                .set("name", "jack4")
-                .set("createTime", new Date(System.currentTimeMillis()-10000000000L))
+                .set(TestUser::getName, "jack4")
+                .set(TestUser::getCreateTime, new Date(System.currentTimeMillis()-10000000000L))
                 .where()
-                .equal("name", "jack3")
+                .equal(TestUser::getName, "jack3")
                 .buildUpdate();
 
         testUserMapper.updateSpecification(updateSpecification);
 
+        // 仿照原始jpa的模式实现
         testUserMapper.updateSpecification((cb, query) -> {
-            PredicateExpression expression = cb.and(cb.in("deptNo", "002", "003"), cb.isNull("createTime"));
+            PredicateExpression expression = cb.and(cb.in(TestUser::getDeptNo, "002", "003"), cb.isNull("createTime"));
             PredicateExpression expression1 = cb.or(cb.lessThan("age", 18), expression);
             query.where(cb.equal("name", "Jack"), expression1);
             query.update(cb.set("name", "jack5"), cb.set("createTime", new Date(System.currentTimeMillis()-10000000000L)));

@@ -17,6 +17,7 @@ package com.alilitech.mybatis.jpa.criteria.specification;
 
 import com.alilitech.mybatis.jpa.criteria.CriteriaBuilder;
 import com.alilitech.mybatis.jpa.criteria.CriteriaQuery;
+import com.alilitech.mybatis.jpa.criteria.SerializableFunction;
 import com.alilitech.mybatis.jpa.criteria.expression.SetExpression;
 
 import java.util.ArrayList;
@@ -35,6 +36,14 @@ public class UpdateBuilder<T> extends AbstractSpecificationBuilder<T> {
     }
 
     public UpdateBuilder<T> set(String property, Object value) {
+        specifications.add((cb, query) -> {
+            setExpressions.add(cb.set(property, value));
+            return null;
+        });
+        return this;
+    }
+
+    public <R> UpdateBuilder<T> set(SerializableFunction<T, R> property, Object value) {
         specifications.add((cb, query) -> {
             setExpressions.add(cb.set(property, value));
             return null;
