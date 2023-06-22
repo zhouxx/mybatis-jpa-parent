@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## [v2.1.2] 2023.6.19
+
+* feature:  Specification支持lambda传入属性
+
+## [v2.1.1] 2023.6.12
+
+* feature:  枚举支持指定持久化的字段值
+
+## [v2.1.0] 2023.6.8
+
+* feature:  Specification支持更新语句
+* feature:  spring boot version upgrade to 2.7.x
+
 ## [v2.0.3] 2022.8.25
 
 * feature:  提供更多的方法去构造Sort
