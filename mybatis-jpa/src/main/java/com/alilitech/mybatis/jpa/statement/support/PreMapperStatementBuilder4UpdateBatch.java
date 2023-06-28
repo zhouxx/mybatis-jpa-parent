@@ -29,6 +29,7 @@ import org.apache.ibatis.session.Configuration;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -66,8 +67,11 @@ public class PreMapperStatementBuilder4UpdateBatch extends PreMapperStatementBui
         }
 
         //since 1.1
-        RenderContext renderContext = new RenderContext(null, "rowData");
-        buildSimplePart(entityMetaData.getPrimaryColumnMetaData().getProperty()).render(renderContext);
+        String whereConditions = entityMetaData.getPrimaryColumnMetaDatas().stream().map(columnMetaData -> {
+            RenderContext renderContext = new RenderContext(null, "rowData");
+            buildSimplePart(columnMetaData.getProperty()).render(renderContext);
+            return renderContext.getScript();
+        }).collect(Collectors.joining(" AND "));
 
         List<String> sqlParts = Arrays.asList(
                 "<if test=\"_databaseId != 'Oracle'\">",
@@ -78,7 +82,7 @@ public class PreMapperStatementBuilder4UpdateBatch extends PreMapperStatementBui
                 sets.toString(),
                 "</set>",
                 "WHERE",
-                renderContext.getScript(),
+                whereConditions,
                 "</foreach>",
                 "</if>",
                 "<if test=\"_databaseId == 'Oracle'\">",
@@ -89,7 +93,7 @@ public class PreMapperStatementBuilder4UpdateBatch extends PreMapperStatementBui
                 sets.toString(),
                 "</set>",
                 "WHERE",
-                renderContext.getScript(),
+                whereConditions,
                 "</foreach>",
                 "</if>"
         );

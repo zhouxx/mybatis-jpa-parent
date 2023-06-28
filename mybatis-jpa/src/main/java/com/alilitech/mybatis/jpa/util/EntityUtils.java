@@ -16,6 +16,7 @@
 package com.alilitech.mybatis.jpa.util;
 
 import javax.persistence.Entity;
+import javax.persistence.IdClass;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.lang.reflect.Field;
@@ -50,6 +51,16 @@ public class EntityUtils {
         String className = clazz.getSimpleName();
 
         return CommonUtils.camelToUnderline(className);
+    }
+
+    public static Class<?> getCompositePrimaryKeyClass(Class<?> clazz) {
+        // 判断是否有Table注解
+        if (clazz.isAnnotationPresent(IdClass.class)) {
+            // 获取注解对象
+            IdClass idClass = clazz.getAnnotation(IdClass.class);
+            return idClass.value();
+        }
+        return null;
     }
 
     public static String getEntityName(Class<?> type) {

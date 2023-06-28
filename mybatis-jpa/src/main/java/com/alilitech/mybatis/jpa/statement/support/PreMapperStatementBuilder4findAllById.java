@@ -16,6 +16,7 @@
 package com.alilitech.mybatis.jpa.statement.support;
 
 import com.alilitech.mybatis.jpa.definition.GenericType;
+import com.alilitech.mybatis.jpa.meta.ColumnMetaData;
 import com.alilitech.mybatis.jpa.statement.MethodType;
 import com.alilitech.mybatis.jpa.statement.PreMapperStatement;
 import com.alilitech.mybatis.jpa.statement.PreMapperStatementBuilder;
@@ -25,6 +26,7 @@ import org.apache.ibatis.session.Configuration;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -51,19 +53,39 @@ public class PreMapperStatementBuilder4findAllById extends PreMapperStatementBui
     protected String buildSQL() {
 
         //sql parts
-        List<String> sqlParts = Arrays.asList(
-                "SELECT",
-                entityMetaData.getColumnNamesString(),
-                "FROM",
-                entityMetaData.getTableName(),
-                "<where>",
-                entityMetaData.getPrimaryColumnMetaData().getColumnName(),
-                "IN",
-                "<foreach item=\"item\" index=\"index\" open=\"(\" separator=\",\" close=\")\" collection=\"collection\">",
-                "#{item}",
-                "</foreach>",
-                "</where>"
-        );
+        List<String> sqlParts = null;
+        if(entityMetaData.isCompositePrimaryKey()) {
+            String primaryKeys = entityMetaData.getPrimaryColumnMetaDatas().stream().map(ColumnMetaData::getColumnName).collect(Collectors.joining(", ", "(", ")"));
+            String primaryItems = entityMetaData.getPrimaryColumnMetaDatas().stream().map(ColumnMetaData::getProperty).map(s -> "#{id." + s + "}").collect(Collectors.joining(", "));
+
+            sqlParts = Arrays.asList(
+                    "SELECT",
+                    entityMetaData.getColumnNamesString(),
+                    "FROM",
+                    entityMetaData.getTableName(),
+                    "<where>",
+                    primaryKeys,
+                    "IN",
+                    "<foreach item=\"id\" index=\"index\" open=\"(\" separator=\",\" close=\")\" collection=\"collection\">",
+                    "(" + primaryItems + ")",
+                    "</foreach>",
+                    "</where>"
+            );
+        } else {
+            sqlParts = Arrays.asList(
+                    "SELECT",
+                    entityMetaData.getColumnNamesString(),
+                    "FROM",
+                    entityMetaData.getTableName(),
+                    "<where>",
+                    entityMetaData.getPrimaryColumnMetaData().getColumnName(),
+                    "IN",
+                    "<foreach item=\"item\" index=\"index\" open=\"(\" separator=\",\" close=\")\" collection=\"collection\">",
+                    "#{item}",
+                    "</foreach>",
+                    "</where>"
+            );
+        }
 
         return buildScript(sqlParts);
     }

@@ -48,14 +48,16 @@ public class PreMapperStatementBuilder4DeleteById extends PreMapperStatementBuil
 
     @Override
     protected String buildSQL() {
-        RenderContext context = new RenderContext();
-        buildPartTree().render(context);
+//        RenderContext context = new RenderContext();
+//        buildPartTree().render(context);
 
         List<String> sqlParts = Arrays.asList(
                 "DELETE",
                 "FROM",
                 entityMetaData.getTableName(),
-                context.getScript()
+                "<where>",
+                buildPrimaryCondition(),
+                "</where>"
         );
 
         return buildScript(sqlParts);

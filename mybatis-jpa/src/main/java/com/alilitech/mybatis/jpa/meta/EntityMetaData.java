@@ -21,6 +21,7 @@ import com.alilitech.mybatis.jpa.util.EntityUtils;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -38,8 +39,10 @@ public class EntityMetaData {
     /** 表名 */
     private String tableName;
 
+    private boolean compositePrimaryKey = false;
+
     /** 主键column元数据 */
-    private ColumnMetaData primaryColumnMetaData;
+    private List<ColumnMetaData> primaryColumnMetaDatas = new ArrayList<>();
 
     /** column元数据集 {key-fieldName} */
     private Map<String, ColumnMetaData> columnMetaDataMap;
@@ -69,6 +72,13 @@ public class EntityMetaData {
 
     private void init() {
         this.tableName = EntityUtils.getTableName(entityType);
+        Class<?> compositePrimaryKeyClass = EntityUtils.getCompositePrimaryKeyClass(entityType);
+        if(compositePrimaryKeyClass != null) {
+//            if(!idType.equals(compositePrimaryKeyClass)) {
+//                throw new MybatisJpaException("id type is not equals to composite primary key class!");
+//            }
+            compositePrimaryKey = true;
+        }
 
         // 持久化字段集
         List<Field> fields = EntityUtils.getPersistentFields(entityType);
@@ -76,7 +86,7 @@ public class EntityMetaData {
         for (Field field : fields) {
             ColumnMetaData columnMetaData = new ColumnMetaData(field, this);
             if(columnMetaData.isPrimaryKey()) {
-                primaryColumnMetaData = columnMetaData;
+                primaryColumnMetaDatas.add(columnMetaData);
             }
 
             columnMetaDataMap.put(field.getName(), columnMetaData);
@@ -111,11 +121,10 @@ public class EntityMetaData {
     }
 
     public ColumnMetaData getPrimaryColumnMetaData() {
-        return primaryColumnMetaData;
-    }
-
-    public void setPrimaryColumnMetaData(ColumnMetaData primaryColumnMetaData) {
-        this.primaryColumnMetaData = primaryColumnMetaData;
+        if(primaryColumnMetaDatas.size() == 1) {
+            return primaryColumnMetaDatas.get(0);
+        }
+        return null;
     }
 
     public Map<String, ColumnMetaData> getColumnMetaDataMap() {
@@ -134,6 +143,10 @@ public class EntityMetaData {
         return String.join(", ", columnNames);
     }
 
+    public boolean isCompositePrimaryKey() {
+        return compositePrimaryKey;
+    }
+
     public String getColumnNames(String alias) {
         StringBuilder columnNamesTemp = new StringBuilder();
         for(ColumnMetaData columnMetaData : columnMetaDataMap.values()) {
@@ -143,5 +156,17 @@ public class EntityMetaData {
         }
 
         return columnNamesTemp.substring(1);
+    }
+
+    public boolean hasPrimaryKey() {
+        return !primaryColumnMetaDatas.isEmpty();
+    }
+
+    public String getPrimaryCondition() {
+        return primaryColumnMetaDatas.stream().map(ColumnMetaData::getProperty).map(s -> Character.toUpperCase(s.charAt(0)) + s.substring(1)).collect(Collectors.joining("And"));
+    }
+
+    public List<ColumnMetaData> getPrimaryColumnMetaDatas() {
+        return primaryColumnMetaDatas;
     }
 }

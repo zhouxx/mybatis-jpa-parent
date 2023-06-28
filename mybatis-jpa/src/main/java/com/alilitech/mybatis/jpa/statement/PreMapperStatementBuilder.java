@@ -142,12 +142,15 @@ public abstract class PreMapperStatementBuilder extends BaseBuilder {
 
         //将ById 转换成 ByPrimaryKey
         if(ParameterType.ID == methodType.getParameterType()) {
-            String paramExpression = entityMetaData.getPrimaryColumnMetaData().getProperty();
-            paramExpression = Character.toUpperCase(paramExpression.charAt(0)) + paramExpression.substring(1);
+            String paramExpression = entityMetaData.getPrimaryCondition();
             expression = expression.replace("ById", "By" + paramExpression);
         }
 
         return new PartTree(expression, entityMetaData.getEntityType(), methodDefinition);
+    }
+
+    protected String buildPrimaryCondition() {
+        return entityMetaData.getPrimaryColumnMetaDatas().stream().map(columnMetaData -> columnMetaData.getColumnName() + " = " + "#{" + columnMetaData.getProperty() + "}").collect(Collectors.joining(" AND "));
     }
 
     /**
@@ -230,7 +233,7 @@ public abstract class PreMapperStatementBuilder extends BaseBuilder {
      */
     protected void setKeyGeneratorAndTriggerValue(PreMapperStatement preMapperStatement) {
 
-        //未指定主键
+        //未指定主键或复合主键
         if(entityMetaData.getPrimaryColumnMetaData() == null) {
             setNoKeyGenerator(preMapperStatement);
         }

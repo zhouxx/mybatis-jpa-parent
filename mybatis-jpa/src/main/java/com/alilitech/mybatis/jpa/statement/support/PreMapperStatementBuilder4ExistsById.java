@@ -49,8 +49,8 @@ public class PreMapperStatementBuilder4ExistsById extends PreMapperStatementBuil
     @Override
     protected String buildSQL() {
 
-        RenderContext context = new RenderContext();
-        buildPartTree().render(context);
+//        RenderContext context = new RenderContext();
+//        buildPartTree().render(context);
 
         //sql parts
         List<String> sqlParts = Arrays.asList(
@@ -58,7 +58,9 @@ public class PreMapperStatementBuilder4ExistsById extends PreMapperStatementBuil
                 "count(1)",
                 "FROM",
                 entityMetaData.getTableName(),
-                context.getScript()
+                "<where>",
+                buildPrimaryCondition(),
+                "</where>"
         );
 
         return buildScript(sqlParts);

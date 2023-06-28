@@ -30,6 +30,7 @@ import org.apache.ibatis.session.Configuration;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -84,8 +85,14 @@ public class PreMapperStatementBuilder4UpdateSelective extends PreMapperStatemen
 
         sets.append("</trim>");
 
-        RenderContext renderContext = new RenderContext();
-        buildSimplePart(entityMetaData.getPrimaryColumnMetaData().getProperty()).render(renderContext);
+        String whereConditions = entityMetaData.getPrimaryColumnMetaDatas().stream().map(columnMetaData -> {
+            RenderContext renderContext = new RenderContext();
+            buildSimplePart(columnMetaData.getProperty()).render(renderContext);
+            return renderContext.getScript();
+        }).collect(Collectors.joining(" AND "));
+
+//        RenderContext renderContext = new RenderContext();
+//        buildSimplePart(entityMetaData.getPrimaryColumnMetaData().getProperty()).render(renderContext);
 
         //since 1.1
         List<String> sqlParts = Arrays.asList(
@@ -94,7 +101,7 @@ public class PreMapperStatementBuilder4UpdateSelective extends PreMapperStatemen
                 "SET",
                 sets.toString(),
                 "WHERE",
-                renderContext.getScript()
+                whereConditions
         );
 
         return buildScript(sqlParts);

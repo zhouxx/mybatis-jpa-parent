@@ -24,11 +24,10 @@ import com.alilitech.mybatis.jpa.domain.Direction;
 import com.alilitech.mybatis.jpa.domain.Order;
 import com.alilitech.mybatis.jpa.domain.Page;
 import com.alilitech.mybatis.jpa.domain.Sort;
-import com.alilitech.mybatis.jpa.test.domain.Sex;
-import com.alilitech.mybatis.jpa.test.domain.TestDept;
-import com.alilitech.mybatis.jpa.test.domain.TestUser;
+import com.alilitech.mybatis.jpa.test.domain.*;
 import com.alilitech.mybatis.jpa.test.mapper.TestDeptMapper;
 import com.alilitech.mybatis.jpa.test.mapper.TestUserMapper;
+import com.alilitech.mybatis.jpa.test.mapper.UserRoleMapper;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -42,6 +41,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Zhou Xiaoxiang
@@ -52,6 +52,8 @@ public class JpaTest {
     private TestUserMapper testUserMapper;
 
     private TestDeptMapper testDeptMapper;
+
+    private UserRoleMapper userRoleMapper;
 
     private SqlSession sqlSession;
 
@@ -68,6 +70,7 @@ public class JpaTest {
 
         testUserMapper = sqlSession.getMapper(TestUserMapper.class);
         testDeptMapper = sqlSession.getMapper(TestDeptMapper.class);
+        userRoleMapper = sqlSession.getMapper(UserRoleMapper.class);
     }
 
     /**
@@ -231,6 +234,51 @@ public class JpaTest {
         testUserMapper.deleteBatch(Arrays.asList("5", "6"));
         // deleteByxxxx
         testUserMapper.deleteByNameAndDeptNo("Jackson", "002");
+    }
+
+    @Test
+    public void userRoleTest() {
+
+        UserRole userRole = new UserRole();
+        userRole.setUserId("1");
+        userRole.setRoleId("2");
+        userRole.setEnabled(true);
+
+        UserRolePK userRolePK = new UserRolePK("1", "2");
+
+//        userRoleMapper.insert(userRole);
+
+        UserRole userRole1 = new UserRole();
+        userRole1.setUserId("1");
+        userRole1.setRoleId("3");
+        userRole1.setEnabled(true);
+
+        UserRole userRole2 = new UserRole();
+        userRole2.setUserId("1");
+        userRole2.setRoleId("4");
+        userRole2.setEnabled(false);
+
+//        userRoleMapper.insertBatch(Arrays.asList(userRole1, userRole2));
+
+        userRoleMapper.findById(userRolePK);
+
+        userRoleMapper.findAllById(Arrays.asList(userRolePK, new UserRolePK("1", "3")));
+
+//        userRole.setEnabled(false);
+//        userRoleMapper.updateSelective(userRole);
+//
+//        userRole.setEnabled(null);
+//        userRoleMapper.update(userRole);
+
+
+        userRole.setEnabled(true);
+        userRole1.setEnabled(false);
+
+        userRoleMapper.updateBatch(Arrays.asList(userRole, userRole1));
+
+        userRoleMapper.deleteById(userRolePK);
+
+        userRoleMapper.deleteBatch(Arrays.asList(userRolePK, new UserRolePK("1", "3")));
     }
 
     @After

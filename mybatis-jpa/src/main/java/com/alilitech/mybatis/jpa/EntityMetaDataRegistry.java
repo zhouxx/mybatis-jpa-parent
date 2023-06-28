@@ -48,7 +48,7 @@ public class EntityMetaDataRegistry {
     public void register(Class<?> entityClass) {
         synchronized (entityMetaDataMap) {
             EntityMetaData entityMetaData = new EntityMetaData(entityClass);
-            if(entityMetaData.getPrimaryColumnMetaData() == null) {
+            if(!entityMetaData.hasPrimaryKey()) {
                 log.warn("The domain class called '" + entityClass.getName() + "' do not have a primary key.");
             }
             entityMetaDataMap.put(entityClass, entityMetaData);

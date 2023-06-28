@@ -68,7 +68,7 @@ public class ParameterAssistant {
         // MetaObject to operate the parameter object
         MetaObject metaObject = mappedStatement.getConfiguration().newMetaObject(parameterObject);
 
-        if (mappedStatement.getSqlCommandType() == SqlCommandType.INSERT) {
+        if (mappedStatement.getSqlCommandType() == SqlCommandType.INSERT && !entityMetaData.isCompositePrimaryKey()) {
 
             /**
              * set the primary key

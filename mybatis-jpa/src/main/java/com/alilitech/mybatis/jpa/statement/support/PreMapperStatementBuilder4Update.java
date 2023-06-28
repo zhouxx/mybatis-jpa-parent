@@ -27,6 +27,9 @@ import org.apache.ibatis.jdbc.SQL;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.Configuration;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 
 /**
  *
@@ -48,8 +51,12 @@ public class PreMapperStatementBuilder4Update extends PreMapperStatementBuilder 
 
     @Override
     protected String buildSQL() {
-        RenderContext renderContext = new RenderContext();
-        buildSimplePart(entityMetaData.getPrimaryColumnMetaData().getProperty()).render(renderContext);
+
+        String whereConditions = entityMetaData.getPrimaryColumnMetaDatas().stream().map(columnMetaData -> {
+            RenderContext renderContext = new RenderContext();
+            buildSimplePart(columnMetaData.getProperty()).render(renderContext);
+            return renderContext.getScript();
+        }).collect(Collectors.joining(" AND "));
 
         SQL sql = new SQL().UPDATE(entityMetaData.getTableName());
 
@@ -59,7 +66,7 @@ public class PreMapperStatementBuilder4Update extends PreMapperStatementBuilder 
             }
             sql.SET(columnMetaData.getColumnName() + " = " + StatementAssistant.resolveSqlParameterBySysFunction(columnMetaData, SqlCommandType.UPDATE));
         }
-        sql.WHERE(renderContext.getScript());
+        sql.WHERE(whereConditions);
 
         return sql.toString();
 

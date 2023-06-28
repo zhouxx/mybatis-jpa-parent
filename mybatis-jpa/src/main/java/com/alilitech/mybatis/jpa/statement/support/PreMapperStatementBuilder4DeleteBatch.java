@@ -16,6 +16,7 @@
 package com.alilitech.mybatis.jpa.statement.support;
 
 import com.alilitech.mybatis.jpa.definition.GenericType;
+import com.alilitech.mybatis.jpa.meta.ColumnMetaData;
 import com.alilitech.mybatis.jpa.statement.MethodType;
 import com.alilitech.mybatis.jpa.statement.PreMapperStatement;
 import com.alilitech.mybatis.jpa.statement.PreMapperStatementBuilder;
@@ -25,6 +26,7 @@ import org.apache.ibatis.session.Configuration;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -49,17 +51,35 @@ public class PreMapperStatementBuilder4DeleteBatch extends PreMapperStatementBui
     protected String buildSQL() {
 
         //sql parts
-        List<String> sqlParts = Arrays.asList(
-                "DELETE",
-                "FROM",
-                entityMetaData.getTableName(),
-                "WHERE",
-                entityMetaData.getPrimaryColumnMetaData().getColumnName(),
-                "IN",
-                "<foreach collection='collection' index='index' item='id' open='(' separator=',' close=')'>",
-                "#{id}",
-                "</foreach>"
-        );
+        List<String> sqlParts = null;
+        if(entityMetaData.isCompositePrimaryKey()) {
+            String primaryKeys = entityMetaData.getPrimaryColumnMetaDatas().stream().map(ColumnMetaData::getColumnName).collect(Collectors.joining(", ", "(", ")"));
+            String primaryItems = entityMetaData.getPrimaryColumnMetaDatas().stream().map(ColumnMetaData::getProperty).map(s -> "#{id." + s + "}").collect(Collectors.joining(", "));
+
+            sqlParts = Arrays.asList(
+                    "DELETE",
+                    "FROM",
+                    entityMetaData.getTableName(),
+                    "WHERE",
+                    primaryKeys,
+                    "IN",
+                    "<foreach collection='collection' index='index' item='id' open='(' separator=',' close=')'>",
+                    "(" + primaryItems + ")",
+                    "</foreach>"
+            );
+        } else {
+            sqlParts = Arrays.asList(
+                    "DELETE",
+                    "FROM",
+                    entityMetaData.getTableName(),
+                    "WHERE",
+                    entityMetaData.getPrimaryColumnMetaData().getColumnName(),
+                    "IN",
+                    "<foreach collection='collection' index='index' item='id' open='(' separator=',' close=')'>",
+                    "#{id}",
+                    "</foreach>"
+            );
+        }
 
         return buildScript(sqlParts);
     }

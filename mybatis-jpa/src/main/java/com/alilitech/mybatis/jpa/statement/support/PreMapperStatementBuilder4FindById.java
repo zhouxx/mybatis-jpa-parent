@@ -26,6 +26,7 @@ import org.apache.ibatis.session.Configuration;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -53,15 +54,18 @@ public class PreMapperStatementBuilder4FindById extends PreMapperStatementBuilde
     @Override
     protected String buildSQL() {
 
-        RenderContext context = new RenderContext();
-        buildPartTree().render(context);
+//        RenderContext context = new RenderContext();
+//        buildPartTree().render(context);
+
         //sql parts
         List<String> sqlParts = Arrays.asList(
                 "SELECT",
                 entityMetaData.getColumnNamesString(),
                 "FROM",
                 entityMetaData.getTableName(),
-                context.getScript()
+                "<where>",
+                buildPrimaryCondition(),
+                "</where>"
         );
 
         return buildScript(sqlParts);
