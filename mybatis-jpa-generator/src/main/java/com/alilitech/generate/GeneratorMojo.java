@@ -86,6 +86,8 @@ public class GeneratorMojo extends AbstractMojo {
 
         GeneratorUtils.log = getLog();
         List<ClassDefinition> classDefinitions = GeneratorUtils.process(dataSourceConfig, globalConfig, tableConfigs);
+        // 判断是否要输出磁盘文件
+        int tableIndex = 0;
         for (int i=0; i<classDefinitions.size(); i++) {
             ClassDefinition classDefinition = classDefinitions.get(i);
             try {
@@ -101,9 +103,13 @@ public class GeneratorMojo extends AbstractMojo {
                 //输出文件
                 File fileJava = new File(fileDirectory + File.separator + classDefinition.getClassName() + ".java");
 
-                // 判断是否要输出磁盘文件
-                int tableIndex = i/2;
                 TableConfig tableConfig = tableConfigs.get(tableIndex);
+
+                // 下一张表
+                if(classDefinition.getClassType() == ClassType.MAPPER) {
+                    tableIndex ++;
+                }
+
                 if(!fileJava.exists()) {
                     classDefinition.out(new FileOutputStream(fileJava));
                     continue;
@@ -114,6 +120,7 @@ public class GeneratorMojo extends AbstractMojo {
                 if(fileJava.exists() && classDefinition.getClassType() == ClassType.MAPPER && tableConfig.isOverrideMapper()) {
                     classDefinition.out(new FileOutputStream(fileJava));
                 }
+
             } catch (IOException e) {
                 throw new MojoFailureException("生成文件失败", e);
             }

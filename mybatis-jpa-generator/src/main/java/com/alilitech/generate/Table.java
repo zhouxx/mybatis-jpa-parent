@@ -18,6 +18,7 @@ package com.alilitech.generate;
 import com.alilitech.generate.config.TableConfig;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Zhou Xiaoxiang
@@ -29,40 +30,27 @@ public class Table {
 
     private TableConfig tableConfig;
 
-    private TableColumn primaryKeyColumn;
+    private List<TableColumn> primaryKeyColumns;
 
     public Table(List<TableColumn> tableColumns, TableConfig tableConfig) {
         this.tableColumns = tableColumns;
         this.tableConfig = tableConfig;
+        this.primaryKeyColumns = tableColumns.stream().filter(TableColumn::isPrimary).collect(Collectors.toList());
     }
 
     public List<TableColumn> getTableColumns() {
         return tableColumns;
     }
 
-    public void setTableColumns(List<TableColumn> tableColumns) {
-        this.tableColumns = tableColumns;
-    }
-
     public TableConfig getTableConfig() {
         return tableConfig;
     }
 
-    public void setTableConfig(TableConfig tableConfig) {
-        this.tableConfig = tableConfig;
+    public List<TableColumn> getPrimaryKeyColumns() {
+        return primaryKeyColumns;
     }
 
-    public TableColumn getPrimaryKeyColumn() {
-        for(TableColumn tableColumn : tableColumns) {
-            if(tableColumn.isPrimary()) {
-                return tableColumn;
-            }
-        }
-        return primaryKeyColumn;
+    public boolean isCompositeKeys() {
+        return primaryKeyColumns.size() > 1;
     }
-
-    public void setPrimaryKeyColumn(TableColumn primaryKeyColumn) {
-        this.primaryKeyColumn = primaryKeyColumn;
-    }
-
 }

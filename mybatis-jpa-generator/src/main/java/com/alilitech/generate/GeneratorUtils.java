@@ -77,10 +77,10 @@ public class GeneratorUtils {
 
                 ResultSet rsPK = metaData.getPrimaryKeys(catalog, null, tableName);
 
-                String pkColumn = null;
+                List<String> pkColumns = new ArrayList<>();
 
-                if(rsPK.next()) {
-                    pkColumn = rsPK.getString("COLUMN_NAME");
+                while (rsPK.next()) {
+                    pkColumns.add(rsPK.getString("COLUMN_NAME"));
                 }
 
                 ResultSet rs = metaData.getColumns(catalog, "%", tableName, "%");
@@ -103,7 +103,7 @@ public class GeneratorUtils {
                     tableColumn.setColumnType(covertDomain(columnType, columnSize));
                     tableColumn.setDefaultValue(defaultValue);
                     tableColumn.setNullAble(isNull);
-                    tableColumn.setPrimary(columnName.equals(pkColumn));
+                    tableColumn.setPrimary(pkColumns.contains(columnName));
                     tableColumn.setRemark(remark);
                     tableColumn.setAutoIncrement("YES".equals(isAutoIncrement));
                     tableColumn.setScale(scale);
@@ -133,14 +133,22 @@ public class GeneratorUtils {
 
         tables.forEach(table -> {
 
+            ClassDefinition pkDefinition = covertPK(table, globalConfig.getPackageName());
+            Class<?> pkClass = null;
+            if(pkDefinition != null) {
+                classDefinitions.add(pkDefinition);
+                pkClass = loadClass(new HashMap<>(), classDefinitions);
+                pkDefinition.addAnnotation("Getter").addAnnotation("Setter").addImport("lombok.Getter").addImport("lombok.Setter");
+            }
+
             //domain
-            ClassDefinition domainClassDefinition = covertDomain(table, globalConfig.getPackageName());
+            ClassDefinition domainClassDefinition = covertDomain(table, globalConfig.getPackageName(), pkClass);
             classDefinitions.add(domainClassDefinition);
             Class<?> domainClass = loadClass(new HashMap<>(), classDefinitions);
             domainClassDefinition.addAnnotation("Getter").addAnnotation("Setter").addImport("lombok.Getter").addImport("lombok.Setter");
 
             //mapper
-            ClassDefinition mapperDefinition = covertMapper(table, globalConfig.getPackageName(), domainClass);
+            ClassDefinition mapperDefinition = covertMapper(table, globalConfig.getPackageName(), domainClass, pkClass);
             classDefinitions.add(mapperDefinition);
 
         });
@@ -183,18 +191,43 @@ public class GeneratorUtils {
         }
     }
 
-    private static ClassDefinition covertDomain(Table table, String globalPackageName) {
-        //生成domain
-        ClassDefinition classDefinition = new ClassDefinition(table.getTableConfig().getDomainName());
-        classDefinition.setClassType(ClassType.DOMAIN).setPackageName(globalPackageName + "." + ClassType.DOMAIN.getType());
-        classDefinition.addAnnotation(new AnnotationDefinition(javax.persistence.Table.class).addProperty("name", table.getTableConfig().getTableName()));
+    private static ClassDefinition covertPK(Table table, String globalPackageName) {
+        // 生成ID class
+        if(table.isCompositeKeys()) {
+            //生成domain
+            ClassDefinition pkDefinition = new ClassDefinition(table.getTableConfig().getDomainName() + "PK");
 
+            pkDefinition.setClassType(ClassType.DOMAIN).setPackageName(globalPackageName + "." + ClassType.DOMAIN.getType());
+
+            table.getPrimaryKeyColumns().forEach(tableColumn -> {
+                FieldDefinition fieldDefinition = new FieldDefinition(tableColumn.getColumnType(), tableColumn.getProperty());
+
+                pkDefinition.addFieldDefinition(fieldDefinition);
+            });
+
+            return pkDefinition;
+        }
+
+        return null;
+    }
+
+    private static ClassDefinition covertDomain(Table table, String globalPackageName, Class<?> pkClass) {
+        //生成domain
+        ClassDefinition domainDefinition = new ClassDefinition(table.getTableConfig().getDomainName());
+        domainDefinition.setClassType(ClassType.DOMAIN).setPackageName(globalPackageName + "." + ClassType.DOMAIN.getType());
+        domainDefinition.addAnnotation(new AnnotationDefinition(javax.persistence.Table.class).addProperty("name", table.getTableConfig().getTableName()));
+
+        if(pkClass != null) {
+            domainDefinition.addAnnotation(new AnnotationDefinition(javax.persistence.IdClass.class).addProperty(null, pkClass));
+        }
         table.getTableColumns().forEach(tableColumn -> {
             FieldDefinition fieldDefinition = new FieldDefinition(tableColumn.getColumnType(), tableColumn.getProperty());
 
             if(tableColumn.isPrimary()) {
                 fieldDefinition.addAnnotation(Id.class);
-                fieldDefinition.addAnnotation(new AnnotationDefinition(GeneratedValue.class).addProperty("value", GenerationType.AUTO));
+                if(!table.isCompositeKeys()) {
+                    fieldDefinition.addAnnotation(new AnnotationDefinition(GeneratedValue.class).addProperty("value", GenerationType.AUTO));
+                }
             }
             if(tableColumn.getRemark() != null && !tableColumn.getRemark().equals("")) {
                 fieldDefinition.addComment(tableColumn.getRemark());
@@ -205,9 +238,9 @@ public class GeneratorUtils {
                 fieldDefinition.addAnnotation(new AnnotationDefinition(Column.class).addProperty("name", tableColumn.getColumnName()));
             }
 
-            classDefinition.addFieldDefinition(fieldDefinition);
+            domainDefinition.addFieldDefinition(fieldDefinition);
         });
-        return classDefinition;
+        return domainDefinition;
     }
 
     private static Class<?> loadClass(Map<String, byte[]> exist, List<ClassDefinition> classDefinitions) {
@@ -248,20 +281,21 @@ public class GeneratorUtils {
         return null;
     }
 
-    private static ClassDefinition covertMapper(Table table, String globalPackageName, Class<?> domainClass) {
+    private static ClassDefinition covertMapper(Table table, String globalPackageName, Class<?> domainClass, Class<?> idClass) {
         //生成domain
         ClassDefinition classDefinition = new ClassDefinition(table.getTableConfig().getDomainName() + "Mapper");
         classDefinition.setClassType(ClassType.MAPPER).setPackageName(globalPackageName + "." + ClassType.MAPPER.getType());
         classDefinition.setInterfaced(true);
-
-        Class<?> idClass = null;
-        Field[] fields = domainClass.getDeclaredFields();
-        for(Field field : fields) {
-            if(field.getAnnotation(Id.class) != null) {
-                idClass = field.getType();
-                break;
+        if(idClass == null) {
+            Field[] fields = domainClass.getDeclaredFields();
+            for(Field field : fields) {
+                if(field.getAnnotation(Id.class) != null) {
+                    idClass = field.getType();
+                    break;
+                }
             }
         }
+
         TypeResolver typeResolver = new TypeResolver();
         ResolvedType resolvedType = typeResolver.resolve(PageMapper.class, domainClass, idClass);
 
