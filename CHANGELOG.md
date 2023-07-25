@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## [v2.1.4] 2023.7.9
+
+* feature:  生成器支持联合主键
+
+## [v2.1.3] 2023.6.28
+
+* feature:  支持联合主键
+
 ## [v2.1.2] 2023.6.19
 
 * feature:  Specification支持lambda传入属性
