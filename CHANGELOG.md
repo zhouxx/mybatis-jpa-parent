@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v2.1.4] 2023.8.14
+
+* fix bug:  修复只使用mybatis-jpa无法使用count分页的问题
+* fix bug:  修复使用mybatis-jpa-spring相关的无法设置枚举属性值的问题
+
 ## [v2.1.4] 2023.7.9
 
 * feature:  代码生成器支持联合主键
