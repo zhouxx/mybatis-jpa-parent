@@ -21,6 +21,7 @@ import com.alilitech.mybatis.jpa.domain.Direction;
 import com.alilitech.mybatis.jpa.domain.Order;
 import com.alilitech.mybatis.jpa.domain.Page;
 import com.alilitech.mybatis.jpa.domain.Sort;
+import com.alilitech.mybatis.jpa.test.domain.Sex;
 import com.alilitech.mybatis.jpa.test.domain.TestDept;
 import com.alilitech.mybatis.jpa.test.domain.TestUser;
 import com.alilitech.mybatis.jpa.test.mapper.TestDeptMapper;
@@ -63,11 +64,11 @@ public class JpaTest {
     public void insertTest() {
 
         //全量插入
-        TestUser testUser = new TestUser("1", "Jack", 1, 20, "002");
+        TestUser testUser = new TestUser("1", "Jack", Sex.FEMALE, 20, "002");
         testUserMapper.insert(testUser);
 
         //非空插入
-        TestUser testUser1 = new TestUser("2", "Hellen", 0, 20, "003");
+        TestUser testUser1 = new TestUser("2", "Hellen", Sex.MALE, 20, "003");
         TestUser testUser2 = new TestUser("3", "Tom", null, 20, "003");
         testUserMapper.insertSelective(testUser1);
         testUserMapper.insertSelective(testUser2);
@@ -76,9 +77,9 @@ public class JpaTest {
         testDeptMapper.insertBatch(Arrays.asList(new TestDept("002", "Dept2"), new TestDept("003", "Dept3")));
 
         //为了后面操作
-        testUserMapper.insert(new TestUser("4", "Test", 1, 18, "004"));
-        testUserMapper.insert(new TestUser("5", "Test", 1, 18, "004"));
-        testUserMapper.insert(new TestUser("6", "Test", 1, 18, "004"));
+        testUserMapper.insert(new TestUser("4", "Test", Sex.FEMALE, 18, "004"));
+        testUserMapper.insert(new TestUser("5", "Test", Sex.FEMALE, 18, "004"));
+        testUserMapper.insert(new TestUser("6", "Test", Sex.FEMALE, 18, "004"));
     }
 
     /**
@@ -89,7 +90,7 @@ public class JpaTest {
     public void updateTest() {
 
         //全量更新
-        TestUser testUser = new TestUser("1", "Jack", 1, 21, "002");
+        TestUser testUser = new TestUser("1", "Jack", Sex.FEMALE, 21, "002");
         testUserMapper.update(testUser);
 
         //非空更新
@@ -99,8 +100,8 @@ public class JpaTest {
         testUserMapper.updateSelective(testUser);
 
         //批量更新
-        TestUser testUser1 = new TestUser("2", "Hellen", 0, 22, "003");
-        TestUser testUser2 = new TestUser("3", "Tom", 1, 23, "003");
+        TestUser testUser1 = new TestUser("2", "Hellen", Sex.MALE, 22, "003");
+        TestUser testUser2 = new TestUser("3", "Tom", Sex.FEMALE, 23, "003");
         testUserMapper.updateBatch(Arrays.asList(testUser1, testUser2));
 
     }
@@ -141,6 +142,7 @@ public class JpaTest {
         System.out.println(testUserMapper.countByNameAndDeptNo("Jackson", "002"));
         System.out.println(testUserMapper.existsByNameAndDeptNo("Jackson", "002"));
         System.out.println(testUserMapper.existsById("1"));
+        System.out.println(testUserMapper.findBySex(Sex.FEMALE));
 
         //自定义sql不会受影响，完全可以自定义
         System.out.println(testUserMapper.findList());

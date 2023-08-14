@@ -22,6 +22,7 @@ import com.alilitech.mybatis.extension.DatabaseRegistry;
 import com.alilitech.mybatis.jpa.DatabaseTypeRegistry;
 import com.alilitech.mybatis.jpa.JpaInitializer;
 import com.alilitech.mybatis.jpa.parameter.MybatisJpaLanguageDriver;
+import com.alilitech.mybatis.jpa.type.DefaultEnumTypeHandler;
 import com.alilitech.mybatis.spring.MybatisJpaConfigurer;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
@@ -75,6 +76,7 @@ public class MybatisJpaStart implements SmartLifecycle, ApplicationContextAware 
         // mybatis configuration
         org.apache.ibatis.session.Configuration configuration = sqlSessionFactory.getConfiguration();
         configuration.setDefaultScriptingLanguage(MybatisJpaLanguageDriver.class);
+        configuration.setDefaultEnumTypeHandler(DefaultEnumTypeHandler.class);
 
         //start mybatis jpa
         StopWatch watch = new StopWatch();

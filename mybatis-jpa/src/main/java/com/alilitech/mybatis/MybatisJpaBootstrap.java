@@ -22,6 +22,7 @@ import com.alilitech.mybatis.extension.DatabaseRegistry;
 import com.alilitech.mybatis.jpa.DatabaseTypeRegistry;
 import com.alilitech.mybatis.jpa.JpaInitializer;
 import com.alilitech.mybatis.jpa.pagination.PaginationInterceptor;
+import com.alilitech.mybatis.jpa.pagination.PrePaginationInterceptor;
 import com.alilitech.mybatis.jpa.parameter.MybatisJpaLanguageDriver;
 import com.alilitech.mybatis.jpa.type.DefaultEnumTypeHandler;
 import org.apache.ibatis.logging.Log;
@@ -92,10 +93,12 @@ public class MybatisJpaBootstrap {
             }
 
             if(!containPageInterceptor) {
+                configuration.addInterceptor(new PrePaginationInterceptor());
                 configuration.addInterceptor(new PaginationInterceptor(mybatisJpaProperties));
             }
 
         } else {
+            configuration.addInterceptor(new PrePaginationInterceptor());
             configuration.addInterceptor(new PaginationInterceptor(mybatisJpaProperties));
         }
 

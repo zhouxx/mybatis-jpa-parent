@@ -7,6 +7,7 @@ import com.alilitech.mybatis.jpa.domain.Sort;
 import com.alilitech.mybatis.jpa.mapper.CrudMapper;
 import com.alilitech.mybatis.jpa.mapper.PageMapper;
 import com.alilitech.mybatis.jpa.mapper.SpecificationMapper;
+import com.alilitech.mybatis.jpa.test.domain.Sex;
 import com.alilitech.mybatis.jpa.test.domain.TestUser;
 import org.apache.ibatis.annotations.Select;
 
@@ -45,4 +46,5 @@ public interface TestUserMapper extends CrudMapper<TestUser, String>, PageMapper
 
     List<TestUser> findCustomSpecification(Specification specification);
 
+    List<TestUser> findBySex(Sex female);
 }
