@@ -30,7 +30,7 @@ public class ParameterExpression<T> implements AtomicExpression<T> {
     }
 
     public void formatValue(String pattern) {
-        this.paramValue = pattern.replace("\\{0\\}", paramValue.toString());
+        this.paramValue = pattern.replace("{0}", paramValue.toString());
     }
 
     @Override

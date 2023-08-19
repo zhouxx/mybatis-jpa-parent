@@ -40,7 +40,7 @@ public interface TestUserMapper extends CrudMapper<TestUser, String>, PageMapper
 
     Integer countByNameAndDeptNo(String name, String deptNo);
 
-    Boolean existsByNameAndDeptNo(String name, String deptNo);
+    Boolean existsByDeptNo(String deptNo);
 
     List<TestUser> findBySex(Sex sex);
 

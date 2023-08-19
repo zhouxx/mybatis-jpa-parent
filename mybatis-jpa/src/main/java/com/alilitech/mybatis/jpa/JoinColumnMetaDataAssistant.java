@@ -34,7 +34,7 @@ import java.util.List;
  */
 public class JoinColumnMetaDataAssistant {
 
-    private Log log = LogFactory.getLog(JoinColumnMetaDataAssistant.class);
+    private final Log log = LogFactory.getLog(JoinColumnMetaDataAssistant.class);
 
     private final EntityMetaData entityMetaData;
 
@@ -46,6 +46,7 @@ public class JoinColumnMetaDataAssistant {
     }
 
     public JoinColumnMetaDataAssistant init() {
+        int joinTableIndex = 1;
         for(ColumnMetaData columnMetaData : entityMetaData.getColumnMetaDataMap().values()) {
             if(!columnMetaData.isJoin()) {
                 continue;
@@ -54,7 +55,12 @@ public class JoinColumnMetaDataAssistant {
             //join column
             JoinColumnMetaData joinColumnMetaData = columnMetaData.getJoinColumnMetaData();
 
-            EntityMetaData referencedEntityMetaData = EntityMetaDataRegistry.getInstance().get(joinColumnMetaData.getJoinEntityType());
+            EntityMetaData joinEntityMetaData = EntityMetaDataRegistry.getInstance().get(joinColumnMetaData.getJoinEntityType());
+            joinColumnMetaData.setTableName(joinEntityMetaData.getTableName());
+            // 设置tableIndexAlias
+            joinColumnMetaData.setTableIndexAlias(joinEntityMetaData.getTableAlias() + "_" + (joinTableIndex ++));
+
+            EntityMetaData referencedEntityMetaData = joinEntityMetaData;
 
             //直接关联，适用于OneToOne or OneToMany
             if(joinColumnMetaData.getJoinType() != JoinType.MANY_TO_MANY) {
@@ -90,10 +96,16 @@ public class JoinColumnMetaDataAssistant {
                 joinColumnMetaData.setPropertyType(referencedEntityMetaData.getColumnMetaDataMap().get(joinColumnMetaData.getReferencedProperty()).getType());
 
                 //关联字段，如果当前类属性里不存在，则去对面的关联属性里找
-                String columnName = entityMetaData.getColumnMetaDataMap().get(joinColumnMetaData.getProperty()) == null
-                        ? referencedEntityMetaData.getColumnMetaDataMap().get(joinColumnMetaData.getProperty()).getColumnName()
-                        : entityMetaData.getColumnMetaDataMap().get(joinColumnMetaData.getProperty()).getColumnName();
+                String columnName = entityMetaData.getColumnMetaDataMap().get(property) == null
+                        ? referencedEntityMetaData.getColumnMetaDataMap().get(property).getColumnName()
+                        : entityMetaData.getColumnMetaDataMap().get(property).getColumnName();
                 joinColumnMetaData.setColumnName(columnName);
+
+                String referencedColumnName = referencedEntityMetaData.getColumnMetaDataMap().get(referencedProperty) == null
+                        ? entityMetaData.getColumnMetaDataMap().get(referencedProperty).getColumnName()
+                        : referencedEntityMetaData.getColumnMetaDataMap().get(referencedProperty).getColumnName();
+                joinColumnMetaData.setReferencedColumnName(referencedColumnName);
+
             } else {  //间接关联，多对多
                 String property;
                 String referencedProperty;
@@ -101,7 +113,7 @@ public class JoinColumnMetaDataAssistant {
                 String inverseReferencedProperty;
 
                 if(StringUtils.isEmpty(joinColumnMetaData.getMappedProperty())) {
-                    //若未配置，则取自己的主键作为关联字段
+                    //若未配置，则取主表的主键作为关联字段
                     property = StringUtils.isEmpty(joinColumnMetaData.getProperty()) ? entityMetaData.getPrimaryColumnMetaData().getProperty() : joinColumnMetaData.getProperty();
                     referencedProperty = StringUtils.isEmpty(joinColumnMetaData.getReferencedProperty()) ? entityMetaData.getPrimaryColumnMetaData().getProperty() : joinColumnMetaData.getReferencedProperty();
                     //若未配置，则取对方的主键作为关联字段
@@ -134,18 +146,20 @@ public class JoinColumnMetaDataAssistant {
 
                 joinColumnMetaData.setProperty(property);
                 joinColumnMetaData.setReferencedProperty(referencedProperty);
-                joinColumnMetaData.setPropertyType(entityMetaData.getColumnMetaDataMap().get(property).getType());
+                joinColumnMetaData.setReferencedPropertyType(entityMetaData.getColumnMetaDataMap().get(referencedProperty).getType());
 
                 joinColumnMetaData.setInverseProperty(inverseProperty);
                 joinColumnMetaData.setInverseReferencedProperty(inverseReferencedProperty);
-                joinColumnMetaData.setInversePropertyType(referencedEntityMetaData.getColumnMetaDataMap().get(inverseProperty).getType());
+                joinColumnMetaData.setInverseReferencedPropertyType(referencedEntityMetaData.getColumnMetaDataMap().get(inverseReferencedProperty).getType());
 
-                joinColumnMetaData.setColumnName(entityMetaData.getColumnMetaDataMap().get(property).getColumnName());
-                String referencedColumnName = entityMetaData.getColumnMetaDataMap().get(referencedProperty) == null ? CommonUtils.camelToUnderline(referencedProperty) : entityMetaData.getColumnMetaDataMap().get(referencedProperty).getColumnName();
+                String columnName = entityMetaData.getColumnMetaDataMap().get(property) == null ? CommonUtils.camelToUnderline(property) : entityMetaData.getColumnMetaDataMap().get(property).getColumnName();
+                joinColumnMetaData.setColumnName(columnName);
+                String referencedColumnName = entityMetaData.getColumnMetaDataMap().get(referencedProperty).getColumnName();
                 joinColumnMetaData.setReferencedColumnName(referencedColumnName);
 
-                joinColumnMetaData.setInverseColumnName(referencedEntityMetaData.getColumnMetaDataMap().get(inverseProperty).getColumnName());
-                String inverseReferencedColumnName = referencedEntityMetaData.getColumnMetaDataMap().get(inverseReferencedProperty) == null ? CommonUtils.camelToUnderline(inverseReferencedProperty) : referencedEntityMetaData.getColumnMetaDataMap().get(inverseReferencedProperty).getColumnName();
+                String inverseColumName = referencedEntityMetaData.getColumnMetaDataMap().get(inverseProperty) == null ? CommonUtils.camelToUnderline(inverseProperty) : referencedEntityMetaData.getColumnMetaDataMap().get(inverseProperty).getColumnName();
+                joinColumnMetaData.setInverseColumnName(inverseColumName);
+                String inverseReferencedColumnName = referencedEntityMetaData.getColumnMetaDataMap().get(inverseReferencedProperty).getColumnName();
                 joinColumnMetaData.setInverseReferencedColumnName(inverseReferencedColumnName);
             }
 

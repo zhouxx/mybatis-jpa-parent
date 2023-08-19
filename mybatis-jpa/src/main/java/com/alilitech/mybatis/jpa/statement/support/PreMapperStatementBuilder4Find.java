@@ -20,7 +20,6 @@ import com.alilitech.mybatis.jpa.anotation.SubQuery;
 import com.alilitech.mybatis.jpa.definition.GenericType;
 import com.alilitech.mybatis.jpa.statement.MethodType;
 import com.alilitech.mybatis.jpa.statement.PreMapperStatement;
-import com.alilitech.mybatis.jpa.statement.PreMapperStatementBuilder;
 import com.alilitech.mybatis.jpa.statement.parser.PartTree;
 import com.alilitech.mybatis.jpa.statement.parser.RenderContext;
 import com.alilitech.mybatis.jpa.statement.parser.SubQueryPartTree;
@@ -37,12 +36,14 @@ import java.util.List;
  * @author Zhou Xiaoxiang
  * @since 1.0
  */
-public class PreMapperStatementBuilder4Find extends PreMapperStatementBuilder {
+public class PreMapperStatementBuilder4Find extends BaseSelectPreMapperStatementBuilder {
 
     /**
      * 是否是 {@link SqlCommandType#DELETE}
      */
     protected boolean delete = false;
+
+    protected PartTree partTree;
 
     public PreMapperStatementBuilder4Find(Configuration configuration, MapperBuilderAssistant builderAssistant, MethodType methodType) {
         super(configuration, builderAssistant, methodType);
@@ -64,10 +65,10 @@ public class PreMapperStatementBuilder4Find extends PreMapperStatementBuilder {
     @Override
     protected String buildSQL() {
 
-        PartTree partTree = buildPartTree();
+        partTree = buildPartTree();
 
         String operation = "SELECT";
-        String selectPart = entityMetaData.getColumnNamesString();
+        String selectPart;
 
         if(partTree.isCountProjection() || partTree.isExistsProjection()) {
             selectPart = "COUNT(*)";
@@ -81,6 +82,7 @@ public class PreMapperStatementBuilder4Find extends PreMapperStatementBuilder {
         //剩下的就是常规查询了
         else {
             // default select
+            return super.buildSQL();
         }
 
         RenderContext context = new RenderContext();
@@ -100,11 +102,33 @@ public class PreMapperStatementBuilder4Find extends PreMapperStatementBuilder {
                 selectPart,
                 "FROM",
                 entityMetaData.getTableName(),
-                context.getScript(),
-                buildSort()
+                context.getScript()
+//                buildSort()
         );
 
         return buildScript(sqlParts);
+    }
+
+    @Override
+    protected String generateConditionScript(String mainTableAlias) {
+        RenderContext context = new RenderContext(mainTableAlias, null);
+        partTree.render(context);
+
+        /*
+         * if {@link SubQueryContainer} containers statementId, parse the predicates and orders
+         */
+        if(SubQueryContainer.getInstance().isExist(methodDefinition.getStatementId())) {
+            SubQuery subQuery = SubQueryContainer.getInstance().get(methodDefinition.getStatementId());
+            SubQueryPartTree subQueryPartTree = new SubQueryPartTree(subQuery, entityMetaData.getEntityType(), methodDefinition);
+            subQueryPartTree.render(context);
+        }
+
+        return context.getScript();
+    }
+
+    @Override
+    protected String generateSortScript(String mainTableAlias) {
+        return buildSort(mainTableAlias);
     }
 
     @Override

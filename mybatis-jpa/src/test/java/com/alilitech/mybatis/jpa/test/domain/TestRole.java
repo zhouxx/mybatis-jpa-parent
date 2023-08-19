@@ -44,5 +44,14 @@ public class TestRole {
 	@ManyToMany(mappedBy = "roles")
 	private List<TestUser> users;
 
-
+	@Override
+	public String toString() {
+		return "TestRole{" +
+				"id='" + id + '\'' +
+				", roleName='" + roleName + '\'' +
+				", roleCode='" + roleCode + '\'' +
+				", roleDescription='" + roleDescription + '\'' +
+				", users=" + users +
+				'}';
+	}
 }

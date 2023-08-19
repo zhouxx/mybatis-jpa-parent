@@ -442,10 +442,13 @@ public class PredicateBuilder<T> extends AbstractSpecificationBuilder<T> {
     @Override
     public void build(CriteriaBuilder<T> cb, CriteriaQuery<T> query) {
         specificationBuilder.build(cb, query);
-        for (int i = 0; i < specifications.size(); i++) {
-            PredicateExpression<T> predicateExpression = specifications.get(i).toPredicate(cb, query);
-            if(predicateExpression != null) {
-                this.predicates.add(predicateExpression);
+        // 防止重复执行，在查询数量和查询列表的时候这块会重复生成predicates
+        if(predicates.isEmpty()) {
+            for (int i = 0; i < specifications.size(); i++) {
+                PredicateExpression<T> predicateExpression = specifications.get(i).toPredicate(cb, query);
+                if (predicateExpression != null) {
+                    this.predicates.add(predicateExpression);
+                }
             }
         }
         if (predicates != null && !predicates.isEmpty()) {

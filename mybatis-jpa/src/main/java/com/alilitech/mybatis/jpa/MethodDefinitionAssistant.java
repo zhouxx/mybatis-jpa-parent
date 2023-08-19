@@ -15,14 +15,13 @@
  */
 package com.alilitech.mybatis.jpa;
 
-import com.alilitech.mybatis.jpa.definition.JoinStatementDefinition;
-import com.alilitech.mybatis.jpa.definition.MapperDefinition;
-import com.alilitech.mybatis.jpa.definition.MethodDefinition;
-import com.alilitech.mybatis.jpa.definition.ParameterDefinition;
+import com.alilitech.mybatis.jpa.definition.*;
 import com.alilitech.mybatis.jpa.meta.JoinColumnMetaData;
 import com.alilitech.mybatis.jpa.util.CommonUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
+import java.util.Set;
 
 
 /**
@@ -41,7 +40,7 @@ public class MethodDefinitionAssistant {
         this.joinColumnMetaData = joinColumnMetaData;
     }
 
-    public void addRelationMethodDefinition() {
+    public JoinStatementDefinition addRelationMethodDefinition(Set<ColumnDefinition> columnDefinitions) {
         //给被关联方添加查询方法
         MapperDefinition referencedMapperDefinition = mapperDefinitionRegistry.getMapperDefinition(joinColumnMetaData.getJoinEntityType());
         String methodName;
@@ -52,7 +51,7 @@ public class MethodDefinitionAssistant {
             methodName = "findJoinWith" + CommonUtils.upperFirst(joinColumnMetaData.getReferencedProperty());
         }
 
-        MethodDefinition referencedMethodDefinition = new MethodDefinition(referencedMapperDefinition.getNameSpace(), methodName);
+        MethodDefinition referencedMethodDefinition = new MethodDefinition(referencedMapperDefinition.getNamespace(), methodName, columnDefinitions);
 
         //设置子查询容器
         if(joinColumnMetaData.getSubQuery() != null) {
@@ -60,19 +59,23 @@ public class MethodDefinitionAssistant {
         }
 
         //多对多要提供中间表相关
-        if(!StringUtils.isEmpty(joinColumnMetaData.getJoinTableName())) {
+//        if(!StringUtils.isEmpty(joinColumnMetaData.getJoinTableName())) {
             referencedMethodDefinition.setJoinTableName(joinColumnMetaData.getJoinTableName());
+            referencedMethodDefinition.setColumnName(joinColumnMetaData.getColumnName());
             referencedMethodDefinition.setReferencedColumnName(joinColumnMetaData.getReferencedColumnName());
-            referencedMethodDefinition.setInverseReferencedColumnName(joinColumnMetaData.getInverseReferencedColumnName());
             referencedMethodDefinition.setInverseColumnName(joinColumnMetaData.getInverseColumnName());
-        }
+            referencedMethodDefinition.setInverseReferencedColumnName(joinColumnMetaData.getInverseReferencedColumnName());
+//        }
 
         referencedMethodDefinition.setBaseResultMap(true);  //关联查询目前只支持一层查询
-        //referencedMethodDefinition.setCompositeResultMap(true);  //需要返回resultMap
         referencedMethodDefinition.setOneParameter(true);  //只有一个参数
-        ParameterDefinition parameterDefinition = new ParameterDefinition(0, joinColumnMetaData.getPropertyType());
+        ParameterDefinition parameterDefinition = new ParameterDefinition(0, joinColumnMetaData.getPropertyType() == null ? joinColumnMetaData.getReferencedPropertyType() : joinColumnMetaData.getPropertyType());
         referencedMethodDefinition.getParameterDefinitions().add(parameterDefinition);
         referencedMapperDefinition.getMethodDefinitions().add(referencedMethodDefinition);
+
+        JoinStatementDefinition joinStatementDefinition = new JoinStatementDefinition(
+                joinColumnMetaData,
+                referencedMethodDefinition);
 
         //给当前Mapper的方法添加关联查询
         MapperDefinition mapperDefinition = mapperDefinitionRegistry.getMapperDefinition(joinColumnMetaData.getEntityType());
@@ -92,19 +95,27 @@ public class MethodDefinitionAssistant {
                     continue;
                 }
 
-                String nestedSelect = referencedMapperDefinition.getNameSpace() + "." + methodName;
+//                if(joinColumnMetaData.getEntityType().getTypeName().equals("com.alilitech.mybatis.jpa.test.domain.TestUser")
+//                && joinColumnMetaData.getJoinEntityType().getTypeName().equals("com.alilitech.mybatis.jpa.test.domain.TestDept")) {
+//                    String nestedResult = referencedMethodDefinition.getStatementId() + "";
+//
+//                    JoinStatementDefinition joinStatementDefinition = new JoinStatementDefinition(
+//                            (Class<?>) joinColumnMetaData.getJoinEntityType(),
+//                            joinColumnMetaData.getCurrentProperty(),
+//                            nestedResult);
+//                    if(!joinColumnMetaData.isCollection()) {
+//                        joinStatementDefinition.setJavaType((Class<?>) joinColumnMetaData.getJoinEntityType());
+//                    }
+//
+//                    methodDefinition.getJoinStatementDefinitions().add(joinStatementDefinition);
+//                } else {
+//                    String nestedSelect = referencedMapperDefinition.getNameSpace() + "." + methodName;
 
-                JoinStatementDefinition joinStatementDefinition = new JoinStatementDefinition(
-                        (Class<?>) joinColumnMetaData.getJoinEntityType(),
-                        joinColumnMetaData.getCurrentProperty(),
-                        joinColumnMetaData.getColumnName(),
-                        nestedSelect);
-                if(!joinColumnMetaData.isCollection()) {
-                    joinStatementDefinition.setJavaType((Class<?>) joinColumnMetaData.getJoinEntityType());
-                }
+                    methodDefinition.getJoinStatementDefinitions().add(joinStatementDefinition);
+//                }
 
-                methodDefinition.getJoinStatementDefinitions().add(joinStatementDefinition);
             }
         }
+        return joinStatementDefinition;
     }
 }

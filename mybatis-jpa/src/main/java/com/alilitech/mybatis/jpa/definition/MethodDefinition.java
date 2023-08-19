@@ -22,8 +22,7 @@ import com.alilitech.mybatis.jpa.statement.parser.PartTree;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -33,62 +32,97 @@ import java.util.List;
  */
 public class MethodDefinition {
 
-    private String nameSpace;
+    private MapperDefinition mapperDefinition;
+
+    private String namespace;
 
     private String methodName;
 
-    //是否是一个参数
+    /**
+     * 在findWith 和 findJoinWith需要定义列，用于构建resultMap
+     */
+    private Set<ColumnDefinition> columnDefinitions;
+
+    /**
+     * 是否是一个参数
+     */
     private boolean oneParameter;
 
-    //是否有if test
+    /**
+     * 方法上是否有if test
+     */
     private boolean methodIfTest = false;
 
-    private IfTest ifTest ;
+    private IfTest ifTest;
 
     private List<ParameterDefinition> parameterDefinitions = new ArrayList<>();
 
-    //返回类型
+    /**
+     * 返回类型
+     */
     private Class<?> returnType;
 
-    //是否只是返回基础信息
+    /**
+     * 是否是单个查询，不会关联查询
+     */
     private boolean baseResultMap;
 
-    //返回复合resultMap(是否是复合查询）
+    /**
+     * 返回复合resultMap(是否是复合查询）
+     */
     private boolean compositeResultMap;
 
-    // 传入的Page对象的index
+    /**
+     * 传入的Page对象的index
+     */
     private int pageIndex = -1;
 
-    //传入的Sort对象index
+    /**
+     * 传入的Sort对象index
+     */
     private int sortIndex = -1;
 
-    //是否是specification查询
+    /**
+     * 是否是specification查询
+     */
     private boolean specification;
 
+    /**
+     * specification查询类型
+     */
     private SpecificationType specificationType;
 
-    //此方法需要关联查询的部分，可以有多个关联
+    /**
+     * 此方法需要关联查询的部分，可以有多个关联
+     */
     private List<JoinStatementDefinition> joinStatementDefinitions = new ArrayList<>();
 
-    //===========以下字段多对多关联需要====================
+    //===========以下字段关联表需要====================
     //中间表名称
     private String joinTableName;
 
-    //被关联的列名称
+    private String columnName;
+
     private String referencedColumnName;
 
     private String inverseColumnName;
 
     private String inverseReferencedColumnName;
 
-    public MethodDefinition(String nameSpace, Method method) {
+    public MethodDefinition(MapperDefinition mapperDefinition, Method method) {
         this(method);
-        this.nameSpace = nameSpace;
+        this.mapperDefinition = mapperDefinition;
+        this.namespace = mapperDefinition.getNamespace();
     }
 
-    public MethodDefinition(String nameSpace, String methodName) {
+    public MethodDefinition(String namespace, String methodName, Set<ColumnDefinition> columnDefinitions) {
         this(methodName);
-        this.nameSpace = nameSpace;
+        this.namespace = namespace;
+        this.columnDefinitions = columnDefinitions;
+    }
+
+    public MethodDefinition(String namespace, String methodName) {
+        this(namespace, methodName, Collections.emptySet());
     }
 
     public MethodDefinition(String methodName) {
@@ -109,7 +143,7 @@ public class MethodDefinition {
         int size = calculate(parameterDefinitions);
 
         if(specification && size != 1) {
-            throw new ParameterNumberNotMatchException(this.getNameSpace(), this.methodName, 1, size);
+            throw new ParameterNumberNotMatchException(this.getNamespace(), this.methodName, 1, size);
         }
 
         this.oneParameter = size == 1;
@@ -122,20 +156,20 @@ public class MethodDefinition {
         }
     }
 
-    public String getNameSpace() {
-        return nameSpace;
+    public MapperDefinition getMapperDefinition() {
+        return mapperDefinition;
     }
 
-    public void setNameSpace(String nameSpace) {
-        this.nameSpace = nameSpace;
+    public String getNamespace() {
+        return namespace;
     }
 
     public String getMethodName() {
         return methodName;
     }
 
-    public void setMethodName(String methodName) {
-        this.methodName = methodName;
+    public Set<ColumnDefinition> getColumnDefinitions() {
+        return columnDefinitions;
     }
 
     public boolean isOneParameter() {
@@ -182,12 +216,15 @@ public class MethodDefinition {
         this.baseResultMap = baseResultMap;
     }
 
-    public boolean isCompositeResultMap() {
-        return compositeResultMap;
+    /**
+     * 是否是关联查询的子查询
+     */
+    public boolean isJoinMethod() {
+        return methodName.startsWith("findWith") || methodName.startsWith("findJoinWith");
     }
 
-    public void setCompositeResultMap(boolean compositeResultMap) {
-        this.compositeResultMap = compositeResultMap;
+    public boolean isCompositeResultMap() {
+        return compositeResultMap;
     }
 
     public int getSortIndex() {
@@ -224,6 +261,14 @@ public class MethodDefinition {
 
     public void setJoinTableName(String joinTableName) {
         this.joinTableName = joinTableName;
+    }
+
+    public String getColumnName() {
+        return columnName;
+    }
+
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
     }
 
     public String getReferencedColumnName() {
@@ -273,7 +318,7 @@ public class MethodDefinition {
     }
 
     public String getStatementId() {
-        return nameSpace + "." + methodName;
+        return namespace + "." + methodName;
     }
 
     public boolean hasPage() {

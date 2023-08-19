@@ -18,13 +18,9 @@ package com.alilitech.mybatis.jpa.statement.support;
 import com.alilitech.mybatis.jpa.definition.GenericType;
 import com.alilitech.mybatis.jpa.statement.MethodType;
 import com.alilitech.mybatis.jpa.statement.PreMapperStatement;
-import com.alilitech.mybatis.jpa.statement.PreMapperStatementBuilder;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.Configuration;
-
-import java.util.Arrays;
-import java.util.List;
 
 
 /**
@@ -32,7 +28,7 @@ import java.util.List;
  * @author Zhou Xiaoxiang
  * @since 1.0
  */
-public class PreMapperStatementBuilder4FindSpecification extends PreMapperStatementBuilder {
+public class PreMapperStatementBuilder4FindSpecification extends BaseSelectPreMapperStatementBuilder {
 
     public PreMapperStatementBuilder4FindSpecification(Configuration configuration, MapperBuilderAssistant builderAssistant, MethodType methodType) {
         super(configuration, builderAssistant, methodType);
@@ -45,27 +41,43 @@ public class PreMapperStatementBuilder4FindSpecification extends PreMapperStatem
         setFindResultIdOrType(preMapperStatement, genericType);
     }
 
-    @Override
-    protected String buildSQL() {
+//    @Override
+//    protected String buildSQL() {
+//
+//        String operation = "SELECT";
+//        String selectPart = entityMetaData.getColumnNamesString();
+//        List<String> sqlParts = Arrays.asList(
+//                operation,
+//                selectPart,
+//                "FROM",
+//                entityMetaData.getTableName(),
+//                "<where>",
+//                "<if test=\"_parameter != null and _parameter.whereScript != null\">",
+//                "${_parameter.whereScript}",
+//                "</if>",
+//                "</where>",
+//                "<if test=\"_parameter != null and _parameter.orderByScript != null\">",
+//                "${_parameter.orderByScript}",
+//                "</if>"
+//        );
+//
+//        return buildScript(sqlParts);
+//    }
 
-        String operation = "SELECT";
-        String selectPart = entityMetaData.getColumnNamesString();
-        List<String> sqlParts = Arrays.asList(
-                operation,
-                selectPart,
-                "FROM",
-                entityMetaData.getTableName(),
-                "<where>",
+    @Override
+    protected String generateConditionScript(String mainTableAlias) {
+        return String.join(" ",
                 "<if test=\"_parameter != null and _parameter.whereScript != null\">",
                 "${_parameter.whereScript}",
-                "</if>",
-                "</where>",
+                "</if>");
+    }
+
+    @Override
+    protected String generateSortScript(String mainTableAlias) {
+        return String.join(" ",
                 "<if test=\"_parameter != null and _parameter.orderByScript != null\">",
                 "${_parameter.orderByScript}",
-                "</if>"
-        );
-
-        return buildScript(sqlParts);
+                "</if>");
     }
 
     @Override

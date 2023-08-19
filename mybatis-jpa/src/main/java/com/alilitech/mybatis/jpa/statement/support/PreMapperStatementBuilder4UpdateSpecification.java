@@ -47,11 +47,11 @@ public class PreMapperStatementBuilder4UpdateSpecification extends PreMapperStat
 
     @Override
     protected String buildSQL() {
-
-        String operation = "UPDATE";
+        String mainTableAlias = entityMetaData.getTableAlias() + "_0";
         List<String> sqlParts = Arrays.asList(
-                operation,
+                "UPDATE",
                 entityMetaData.getTableName(),
+                mainTableAlias,
                 "<set>",
                 "${_parameter.setScript}",
                 "</set>",

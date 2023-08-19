@@ -83,7 +83,7 @@ public class PreMapperStatementBuilder4FindJoin extends PreMapperStatementBuilde
         //sql parts
         List<String> sqlParts = Arrays.asList(
                 "SELECT",
-                entityMetaData.getColumnNames(tableNameAlias),
+                entityMetaData.getColumnNamesString(tableNameAlias),
                 "FROM",
                 joinTableName,
                 joinTableNameAlias,

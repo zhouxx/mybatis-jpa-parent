@@ -39,22 +39,24 @@ public class EntityMetaData {
     /** 表名 */
     private String tableName;
 
+    private String tableAlias;
+
     private boolean compositePrimaryKey = false;
 
     /** 主键column元数据 */
-    private List<ColumnMetaData> primaryColumnMetaDatas = new ArrayList<>();
+    private final List<ColumnMetaData> primaryColumnMetaDatas = new ArrayList<>();
 
     /** column元数据集 {key-fieldName} */
     private Map<String, ColumnMetaData> columnMetaDataMap;
 
-    private Set<String> columnNames;
+    private final Set<String> columnNames;
 
     public EntityMetaData(Class<?> clazz) {
         this.entityType = clazz;
 
         // 初始化集合
         columnMetaDataMap = new LinkedHashMap<>();
-        columnNames = new HashSet<>();
+        columnNames = new LinkedHashSet<>();
 
         init();
     }
@@ -72,6 +74,7 @@ public class EntityMetaData {
 
     private void init() {
         this.tableName = EntityUtils.getTableName(entityType);
+        this.tableAlias = entityType.getSimpleName().substring(0, 1).toLowerCase(Locale.ENGLISH);
         Class<?> compositePrimaryKeyClass = EntityUtils.getCompositePrimaryKeyClass(entityType);
         if(compositePrimaryKeyClass != null) {
 //            if(!idType.equals(compositePrimaryKeyClass)) {
@@ -100,24 +103,16 @@ public class EntityMetaData {
         return entityType;
     }
 
-    public void setEntityType(Class<?> entityType) {
-        this.entityType = entityType;
-    }
-
     public Class<?> getIdType() {
         return idType;
-    }
-
-    public void setIdType(Class<?> idType) {
-        this.idType = idType;
     }
 
     public String getTableName() {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
+    public String getTableAlias() {
+        return tableAlias;
     }
 
     public ColumnMetaData getPrimaryColumnMetaData() {
@@ -147,15 +142,16 @@ public class EntityMetaData {
         return compositePrimaryKey;
     }
 
-    public String getColumnNames(String alias) {
-        StringBuilder columnNamesTemp = new StringBuilder();
-        for(ColumnMetaData columnMetaData : columnMetaDataMap.values()) {
-            if(!columnMetaData.isJoin()) {
-                columnNamesTemp.append(", ").append(alias).append(".").append(columnMetaData.getColumnName());
-            }
-        }
-
-        return columnNamesTemp.substring(1);
+    public String getColumnNamesString(String alias) {
+        return columnNames.stream().map(s -> alias + "." + s).collect(Collectors.joining(", "));
+//        StringBuilder columnNamesTemp = new StringBuilder();
+//        for(ColumnMetaData columnMetaData : columnMetaDataMap.values()) {
+//            if(!columnMetaData.isJoin()) {
+//                columnNamesTemp.append(", ").append(alias).append(".").append(columnMetaData.getColumnName());
+//            }
+//        }
+//
+//        return columnNamesTemp.substring(1);
     }
 
     public boolean hasPrimaryKey() {

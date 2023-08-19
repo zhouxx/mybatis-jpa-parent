@@ -42,7 +42,9 @@ public class VariableExpression<T> implements AtomicExpression<T> {
         if(!entityMetaData.getColumnMetaDataMap().containsKey(variableName)) {
             throw new MybatisJpaException("Specification property=>" + variableName + " is not exist in class '" + domainClass.getName() + "'");
         }
-        this.variableName = entityMetaData.getColumnMetaDataMap().get(variableName).getColumnName();
+        // 变量都加上别名，这样方便查询
+        this.variableName = entityMetaData.getTableAlias() + "_0." +
+                entityMetaData.getColumnMetaDataMap().get(variableName).getColumnName();
     }
 
     @Override

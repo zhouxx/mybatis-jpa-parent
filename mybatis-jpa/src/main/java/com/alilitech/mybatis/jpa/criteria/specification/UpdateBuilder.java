@@ -55,8 +55,11 @@ public class UpdateBuilder<T> extends AbstractSpecificationBuilder<T> {
     public void build(CriteriaBuilder<T> cb, CriteriaQuery<T> query) {
         specificationBuilder.build(cb, query);
         // 通过调用toPredicate, 从而达到填充setExpressions的目的
-        for (int i = 0; i < specifications.size(); i++) {
-            specifications.get(i).toPredicate(cb, query);
+        // 防止重复执行，setExpressions为空的情况下线执行
+        if(setExpressions.isEmpty()) {
+            for (int i = 0; i < specifications.size(); i++) {
+                specifications.get(i).toPredicate(cb, query);
+            }
         }
         if (setExpressions != null && !setExpressions.isEmpty()) {
             query.update(setExpressions.toArray(new SetExpression[setExpressions.size()]));

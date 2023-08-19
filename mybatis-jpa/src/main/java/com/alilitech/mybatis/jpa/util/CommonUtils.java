@@ -67,6 +67,28 @@ public class CommonUtils {
         return result.toString();
     }
 
+    public static String underlineToAlias(String text) {
+        if (text == null || "".equals(text.trim())) {
+            return "";
+        }
+        int length = text.length();
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            if(i == 0 && text.charAt(i) != '_') {
+                result.append(Character.toLowerCase(text.charAt(i)));
+                continue;
+            }
+            if(i == 0 || text.charAt(i) == '_') {
+                continue;
+            }
+            char c = text.charAt(i-1);
+            if (c == '_') {
+                result.append(Character.toLowerCase(text.charAt(i)));
+            }
+        }
+        return result.toString();
+    }
+
     /**
      * 功能：将输入字符串的首字母改成大写
      * @param str

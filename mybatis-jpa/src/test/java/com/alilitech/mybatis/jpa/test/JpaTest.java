@@ -135,6 +135,7 @@ public class JpaTest {
 
         //设置分页参数，如果是接口，可直接让前端传过来
         Page page = Page.get().page(1).size(2);
+        page.setSelectCount(false);
 
         //设置排序参数，如果是接口，可直接让前端传过来
         Sort sort = new Sort();
@@ -146,11 +147,11 @@ public class JpaTest {
         System.out.println(testUserMapper.findById("2"));
 
         //分页演示，只需要传page对象就分布，不传就不分页，哪怕是自定义的sql
-        System.out.println(testUserMapper.findAllPage(page));
+         System.out.println(testUserMapper.findAllPage(page));
         //分页+排序演示，只需要传page,sort，排序一般用于单表查询的时候排序
-        System.out.println(testUserMapper.findAllPageSort(page, sort));
+         System.out.println(testUserMapper.findAllPageSort(page, sort));
         //findxxxByxxx演示，根据mapper的方法名自动加载sql，可以在方法或参数上@IfTest来实现动态sql
-        System.out.println(testUserMapper.findByName("Jackson").isPresent());
+//        System.out.println(testUserMapper.findByName("Jackson").isPresent());
         System.out.println(testUserMapper.findByNameLike("Jack"));
         System.out.println(testUserMapper.findPageByNameLikeAndDeptNo(page, sort, null, "002"));
         System.out.println(testUserMapper.findByNameLikeAndDeptNo(null, null));
@@ -158,7 +159,7 @@ public class JpaTest {
         System.out.println(testUserMapper.findByNameStartsWithAndDeptNoLikeOrderByNameDesc("Jack", "002"));
         System.out.println(testUserMapper.findByNameStartsWithOrDeptNoAndAgeGreaterThan("Jack", "002", 18));
         System.out.println(testUserMapper.countByNameAndDeptNo("Jackson", "002"));
-        System.out.println(testUserMapper.existsByNameAndDeptNo("Jackson", "002"));
+        System.out.println(testUserMapper.existsByDeptNo("002"));
         System.out.println(testUserMapper.existsById("1"));
         System.out.println(testUserMapper.findBySex(Sex.FEMALE));
 
@@ -175,25 +176,25 @@ public class JpaTest {
     @Test
     public void findSpecificationTest() {
 
-        Integer age = 18;
+        Integer age = 17;
 
         //代码构建，只需要传入{@link Specification}对象
         //WHERE ( dept_no = ? AND ( age > ? AND name like ?) ) order by name ASC
-        List<TestUser> testUsers = testUserMapper.findAllSpecification(Specifications.<TestUser>and()
-                .equal("deptNo", "002")
-                .nested(builder -> {
-                    builder.and()
-                            .greaterThan(age != null, "age", age)
-                            .like("name", "Jack");
-                })
-                .order().asc("name").build());
-
-        System.out.println(testUsers);
+//        List<TestUser> testUsers = testUserMapper.findAllSpecification(Specifications.<TestUser>and()
+//                .equal("deptNo", "002")
+//                .nested(builder -> {
+//                    builder.and()
+//                            .greaterThan(age != null, "age", age)
+//                            .like("name", "Jack");
+//                })
+//                .order().asc("name").build());
+//
+//        System.out.println(testUsers);
 
         //同样传入page参数，即可分页
         Page page = new Page(1, 2);
 
-        testUsers = testUserMapper.findPageSpecification(page, Specifications.<TestUser>and()
+        List<TestUser> testUsers = testUserMapper.findPageSpecification(page, Specifications.<TestUser>and()
                 .equal("deptNo", "002")
                 .order().asc("name").build());
 
@@ -279,6 +280,13 @@ public class JpaTest {
         userRoleMapper.deleteById(userRolePK);
 
         userRoleMapper.deleteBatch(Arrays.asList(userRolePK, new UserRolePK("1", "3")));
+    }
+
+    @Test
+    public void testFindById() {
+        Optional<TestUser> testUser = testUserMapper.findById("5");
+        testUser.ifPresent(System.out::println);
+//        System.out.println(testDeptMapper.findById("f859dc851024479aaa2c795d0c11e4d1"));
     }
 
     @After

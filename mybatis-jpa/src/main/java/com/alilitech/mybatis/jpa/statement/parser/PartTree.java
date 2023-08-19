@@ -104,7 +104,7 @@ public class PartTree implements Render {
                 || PREFIX_TEMPLATE_VIRTUAL_JOIN.matcher(source).find())
         ) {
             // when can not resolve the source, throw the exception
-            throw new StatementNotSupportException(methodDefinition.getNameSpace(), methodDefinition.getMethodName());
+            throw new StatementNotSupportException(methodDefinition.getNamespace(), methodDefinition.getMethodName());
         } else if(matcherVirtual.find()) {
             this.subject = new Subject(Optional.of(matcherVirtual.group(0)));
             this.predicate = new Predicate(source.substring(matcherVirtual.group().length()), domainClass, methodDefinition);

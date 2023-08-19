@@ -39,20 +39,25 @@ public class MapperDefinition {
 
     private String resource1;
 
-    private String nameSpace;
+    private String namespace;
 
     private GenericType genericType;
 
     private List<MethodDefinition> methodDefinitions = new ArrayList<>();
 
+    /**
+     * 所有的关联定义，不管有没有包含，与方法无关
+     */
+    private final List<JoinStatementDefinition> joinStatementDefinitions = new ArrayList<>();
+
     public MapperDefinition(Class<?> mapper) {
         this.resource = mapper.getName().replace(".", "/") + ".java (best guess)";
         this.resource1 = mapper.toString();
-        this.nameSpace = mapper.getName();
+        this.namespace = mapper.getName();
         this.genericType = genericType(mapper);
 
         for (Method method : mapper.getMethods()) {
-            MethodDefinition methodDefinition = new MethodDefinition(nameSpace, method);
+            MethodDefinition methodDefinition = new MethodDefinition(this, method);
             methodDefinitions.add(methodDefinition);
         }
     }
@@ -81,12 +86,12 @@ public class MapperDefinition {
         this.resource1 = resource1;
     }
 
-    public String getNameSpace() {
-        return nameSpace;
+    public String getNamespace() {
+        return namespace;
     }
 
-    public void setNameSpace(String nameSpace) {
-        this.nameSpace = nameSpace;
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
     }
 
     public GenericType getGenericType() {
@@ -103,6 +108,14 @@ public class MapperDefinition {
 
     public void setMethodDefinitions(List<MethodDefinition> methodDefinitions) {
         this.methodDefinitions = methodDefinitions;
+    }
+
+    public void addJoinStatementDefinition(JoinStatementDefinition joinStatementDefinition) {
+        this.joinStatementDefinitions.add(joinStatementDefinition);
+    }
+
+    public List<JoinStatementDefinition> getJoinStatementDefinitions() {
+        return joinStatementDefinitions;
     }
 
     @SuppressWarnings("rawtypes")

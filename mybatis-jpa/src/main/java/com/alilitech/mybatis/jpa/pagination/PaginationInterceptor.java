@@ -17,6 +17,16 @@ package com.alilitech.mybatis.jpa.pagination;
 
 import com.alilitech.mybatis.MybatisJpaProperties;
 import com.alilitech.mybatis.dialect.SqlDialectFactory;
+import com.alilitech.mybatis.jpa.EntityMetaDataRegistry;
+import com.alilitech.mybatis.jpa.StatementRegistry;
+import com.alilitech.mybatis.jpa.definition.MethodDefinition;
+import com.alilitech.mybatis.jpa.pagination.sqlparser.ParseResult;
+import com.alilitech.mybatis.jpa.pagination.sqlparser.SqlParser;
+import com.alilitech.mybatis.jpa.pagination.sqlparser.SqlSelectBody;
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.select.*;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
@@ -32,7 +42,11 @@ import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.RowBounds;
 
+import java.lang.reflect.Type;
 import java.sql.Connection;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 
 /**
@@ -102,7 +116,7 @@ public class PaginationInterceptor implements Interceptor {
             } else {
                 sqlDialectFactory = new SqlDialectFactory(page.getDatabaseType());
             }
-            originalSql = sqlDialectFactory.buildPaginationSql(page, originalSql);
+            originalSql = generateToPageSql(mappedStatement.getId(), originalSql, sqlDialectFactory, page);
         }
         // 替换成分页sql
         metaObject.setValue("delegate.boundSql.sql", originalSql);
@@ -110,5 +124,54 @@ public class PaginationInterceptor implements Interceptor {
         metaObject.setValue("delegate.rowBounds.offset", RowBounds.NO_ROW_OFFSET);
         metaObject.setValue("delegate.rowBounds.limit", RowBounds.NO_ROW_LIMIT);
         return invocation.proceed();
+    }
+
+    /**
+     * 生成需要跟分页参数拼接的sql
+     */
+    private String generateToPageSql(String statementId, String originalSql, SqlDialectFactory sqlDialectFactory, Pagination<?> page) throws JSQLParserException {
+        ParseResult parseResult = SqlParser.getInstance().parse(originalSql, statementId);
+
+        Select select = parseResult.getSelect();
+
+        MethodDefinition methodDefinition = StatementRegistry.getInstance().getMethodDefinition(statementId);
+        Type domainType = methodDefinition.getMapperDefinition().getGenericType().getDomainType();
+        String mainTableAlias = EntityMetaDataRegistry.getInstance().get(domainType).getTableAlias() + "_0";
+
+        PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
+        List<SelectItem> selectItems = plainSelect.getSelectItems();
+
+        // 基于原始的解析copy一个
+        PlainSelect plainSelectPage = new PlainSelect()
+                .withSelectItems(plainSelect.getSelectItems())
+                .withJoins(plainSelect.getJoins())
+                .withOrderByElements(plainSelect.getOrderByElements())
+                .withFromItem(plainSelect.getFromItem())
+                .withWhere(plainSelect.getWhere());
+
+        // 只有主表
+        if(parseResult.isOnlyMainTable()) {
+            List<SelectItem> items = selectItems.stream()
+                    .filter(selectItem -> Objects.equals(mainTableAlias, ((Column)((SelectExpressionItem) selectItem).getExpression()).getTable().getName()))
+                    .collect(Collectors.toList());
+            PlainSelect plainSelectFrom = new PlainSelect()
+                    .withSelectItems(items)
+                    .withFromItem(plainSelect.getFromItem())
+                    .withWhere(plainSelect.getWhere())
+                    .withOrderByElements(plainSelect.getOrderByElements());
+            String paginationSql = sqlDialectFactory.buildPaginationSql(page, plainSelectFrom.toString());
+
+            SqlSelectBody sqlSelectBody = new SqlSelectBody().withSql(paginationSql);
+
+            SubSelect subSelect = new SubSelect().withSelectBody(sqlSelectBody).withAlias(new Alias(mainTableAlias, false));
+
+            plainSelectPage.setFromItem(subSelect);
+            // 外层查询不需要where与orderBy了
+            plainSelectPage.setWhere(null);
+            plainSelectPage.setOrderByElements(null);
+            return new Select().withSelectBody(plainSelectPage).toString();
+        }
+
+        return null;
     }
 }

@@ -32,13 +32,13 @@ public class MapperDefinitionRegistry {
 
     private final Map<Type, MapperDefinition> entityMapperRelation = new ConcurrentHashMap<>();
 
-    private static final MapperDefinitionRegistry mapperDefinitionRegistry = new MapperDefinitionRegistry();
+    private static final MapperDefinitionRegistry MAPPER_DEFINITION_REGISTRY = new MapperDefinitionRegistry();
 
     private MapperDefinitionRegistry() {
     }
 
     public static MapperDefinitionRegistry getInstance() {
-        return mapperDefinitionRegistry;
+        return MAPPER_DEFINITION_REGISTRY;
     }
 
     /**

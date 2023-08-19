@@ -85,7 +85,7 @@ public class PreMapperStatementFactory {
         MethodType methodType = StatementAssistant.resolveMethodType(methodDefinition);
 
         if(!cacheMap.containsKey(methodType)) {
-            throw new StatementNotSupportException(methodDefinition.getNameSpace(), methodDefinition.getMethodName());
+            throw new StatementNotSupportException(methodDefinition.getNamespace(), methodDefinition.getMethodName());
         }
 
         PreMapperStatementBuilder preMapperStatementBuilder = null;

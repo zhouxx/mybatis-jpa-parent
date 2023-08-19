@@ -179,6 +179,7 @@ public class StatementAssistant {
 				.append("#{")
 				.append(StringUtils.isEmpty(alias) ? "" : alias + ".")
 				.append(columnMetaData.getProperty())
+				.append(columnMetaData.getTypeHandler() != null ? ", typeHandler=" + columnMetaData.getTypeHandler().getName() : "")
 				.append(columnMetaData.getJdbcTypeAlias() != null ? ", jdbcType=" + columnMetaData.getJdbcTypeAlias() : "")
 				.append("}");
 

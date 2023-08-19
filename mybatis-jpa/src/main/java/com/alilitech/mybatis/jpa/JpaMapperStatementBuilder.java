@@ -58,7 +58,7 @@ public class JpaMapperStatementBuilder {
     }
 
     public void build() {
-        builderAssistant.setCurrentNamespace(mapperDefinition.getNameSpace());
+        builderAssistant.setCurrentNamespace(mapperDefinition.getNamespace());
         // 构造基础BaseResult
         baseResultMapHandle();
 
@@ -72,7 +72,7 @@ public class JpaMapperStatementBuilder {
                 }
 
                 // add to statement registry
-                AutoGenerateStatementRegistry.getInstance().addStatement(statementId);
+                StatementRegistry.getInstance().addStatement(statementId, methodDefinition);
 
                 PreMapperStatement preMapperStatement = PreMapperStatementFactory.getInstance().createPreMapperStatement(configuration, builderAssistant, methodDefinition, mapperDefinition.getGenericType());
 
@@ -136,7 +136,7 @@ public class JpaMapperStatementBuilder {
                     null,
                     null,
                     null,
-                    null,
+                    columnMeta.getTypeHandler(),
                     flags
             );
 

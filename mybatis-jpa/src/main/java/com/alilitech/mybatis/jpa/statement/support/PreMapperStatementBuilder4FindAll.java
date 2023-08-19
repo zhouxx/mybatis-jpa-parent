@@ -18,20 +18,16 @@ package com.alilitech.mybatis.jpa.statement.support;
 import com.alilitech.mybatis.jpa.definition.GenericType;
 import com.alilitech.mybatis.jpa.statement.MethodType;
 import com.alilitech.mybatis.jpa.statement.PreMapperStatement;
-import com.alilitech.mybatis.jpa.statement.PreMapperStatementBuilder;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.Configuration;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  *
  * @author Zhou Xiaoxiang
  * @since 1.0
  */
-public class PreMapperStatementBuilder4FindAll extends PreMapperStatementBuilder {
+public class PreMapperStatementBuilder4FindAll extends BaseSelectPreMapperStatementBuilder {
 
     public PreMapperStatementBuilder4FindAll(Configuration configuration, MapperBuilderAssistant builderAssistant, MethodType methodType) {
         super(configuration, builderAssistant, methodType);
@@ -48,18 +44,13 @@ public class PreMapperStatementBuilder4FindAll extends PreMapperStatementBuilder
     }
 
     @Override
-    protected String buildSQL() {
+    protected String generateConditionScript(String mainTableAlias) {
+        return "";
+    }
 
-        //sql parts
-        List<String> sqlParts = Arrays.asList(
-                "SELECT",
-                entityMetaData.getColumnNamesString(),
-                "FROM",
-                entityMetaData.getTableName(),
-                buildSort()
-        );
-
-        return buildScript(sqlParts);
+    @Override
+    protected String generateSortScript(String mainTableAlias) {
+        return buildSort(mainTableAlias);
     }
 
     protected Class<?> getParameterTypeClass() {

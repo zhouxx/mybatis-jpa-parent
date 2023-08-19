@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2022 the original author or authors.
+ *    Copyright 2017-2023 the original author or authors.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,31 +13,26 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.alilitech.mybatis.jpa;
+package com.alilitech.mybatis.jpa.util;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * @author Zhou Xiaoxiang
- * @since 1.2
+ * @since 2.2
  */
-public class AutoGenerateStatementRegistry {
+public class LRUCache<K, V> extends LinkedHashMap<K, V> {
+    private static final long serialVersionUID = 1L;
+    protected int maxElements;
 
-    private final List<String> statements = new ArrayList<>();
-
-    private static AutoGenerateStatementRegistry registry = new AutoGenerateStatementRegistry();
-
-    public static AutoGenerateStatementRegistry getInstance() {
-        return registry;
+    public LRUCache(int maxSize) {
+        super(maxSize, 0.75F, true);
+        this.maxElements = maxSize;
     }
 
-    public void addStatement(String statement) {
-        statements.add(statement);
+    @Override
+    protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+        return (size() > this.maxElements);
     }
-
-    public boolean contains(String statement) {
-        return statements.contains(statement);
-    }
-
 }

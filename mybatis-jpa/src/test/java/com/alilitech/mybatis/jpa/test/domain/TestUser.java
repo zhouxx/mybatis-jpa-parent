@@ -61,16 +61,16 @@ public class TestUser {
             predicates = @SubQuery.Predicate(property = "deptNo",condition = "> '0'"),
             orders = @SubQuery.Order(property = "deptNo"))
     //哪些方法关联演示
-    @MappedStatement(exclude = {"findPageSpecification", "findAllSpecification"})
+    @MappedStatement(include = {"findById"})
     private TestDept dept;
 
     //哪些方法关联演示
-    @MappedStatement(include = {"findById"})
+    @MappedStatement(exclude = {"findById"})
     //ManyToMany演示
     @ManyToMany
     @JoinTable(name = "user_role",
-            joinColumns = @JoinColumn(name = "id", referencedColumnName = "userId"),
-            inverseJoinColumns = @JoinColumn(name = "id", referencedColumnName = "roleId"))
+            joinColumns = @JoinColumn(name = "userId", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "roleId", referencedColumnName = "id"))
     //子查询演示
     @SubQuery(
             predicates = {@SubQuery.Predicate(property = "roleCode",condition = "<> '0'"), @SubQuery.Predicate(property = "roleCode",condition = "> '0'")},

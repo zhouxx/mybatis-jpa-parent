@@ -16,12 +16,15 @@
 package com.alilitech.mybatis.jpa.meta;
 
 import com.alilitech.mybatis.jpa.JoinType;
+import com.alilitech.mybatis.jpa.anotation.ColumnResult;
 import com.alilitech.mybatis.jpa.anotation.GeneratedValue;
 import com.alilitech.mybatis.jpa.anotation.*;
 import com.alilitech.mybatis.jpa.parameter.GenerationType;
 import com.alilitech.mybatis.jpa.primary.key.KeyGenerator;
 import com.alilitech.mybatis.jpa.util.ColumnUtils;
 import org.apache.ibatis.type.JdbcType;
+import org.apache.ibatis.type.TypeHandler;
+import org.apache.ibatis.type.UnknownTypeHandler;
 import org.springframework.util.StringUtils;
 
 import javax.persistence.*;
@@ -65,6 +68,9 @@ public class ColumnMetaData {
     /** mybatis jdbcType */
     private JdbcType jdbcType;
 
+    /** mybatis typeHandler */
+    private Class<? extends TypeHandler<?>> typeHandler;
+
     /** 持久化字段 */
     private Field field;
 
@@ -91,7 +97,12 @@ public class ColumnMetaData {
         this.columnName = ColumnUtils.getColumnName(field);
         this.type = field.getType();
 
-        if(type.equals(java.util.Date.class)) {
+        if(field.isAnnotationPresent(ColumnResult.class)) {
+            ColumnResult columnResult = field.getAnnotation(ColumnResult.class);
+            jdbcType = columnResult.jdbcType() == JdbcType.UNDEFINED ? null : columnResult.jdbcType();
+            typeHandler = (Class<? extends TypeHandler<?>>)
+                    ((columnResult.typeHandler() == UnknownTypeHandler.class) ? null : columnResult.typeHandler());
+        } else if(type.equals(java.util.Date.class)) {
             jdbcType = JdbcType.TIMESTAMP;
         }
 
@@ -122,6 +133,7 @@ public class ColumnMetaData {
             //若是集合，则取泛型类型
             if(Collection.class.isAssignableFrom(field.getType())) {
                 joinColumnMetaData.setCollection(true);
+                joinColumnMetaData.setCollectionClass((Class<? extends Collection>) field.getType());
                 Type genericType = field.getGenericType();
                 if(genericType instanceof ParameterizedType) {
                     ParameterizedType parameterizedType = (ParameterizedType) genericType;
@@ -270,6 +282,14 @@ public class ColumnMetaData {
 
     public void setJdbcType(JdbcType jdbcType) {
         this.jdbcType = jdbcType;
+    }
+
+    public Class<? extends TypeHandler<?>> getTypeHandler() {
+        return typeHandler;
+    }
+
+    public void setTypeHandler(Class<? extends TypeHandler<?>> typeHandler) {
+        this.typeHandler = typeHandler;
     }
 
     public Field getField() {

@@ -15,7 +15,8 @@
  */
 package com.alilitech.mybatis.jpa.pagination;
 
-import com.alilitech.mybatis.jpa.AutoGenerateStatementRegistry;
+import com.alilitech.mybatis.jpa.StatementRegistry;
+import com.alilitech.mybatis.jpa.pagination.sqlparser.SqlParser;
 import com.alilitech.mybatis.jpa.parameter.TriggerValue4NoKeyGenerator;
 import org.apache.ibatis.executor.CachingExecutor;
 import org.apache.ibatis.executor.Executor;
@@ -56,9 +57,9 @@ import java.util.regex.Pattern;
 })
 public class PrePaginationInterceptor implements Interceptor {
 
-    private static Pattern fromPattern = Pattern.compile("\\sfrom\\s");
+    private static final Pattern FROM_PATTERN = Pattern.compile("\\sfrom\\s");
 
-    private static Pattern orderPattern = Pattern.compile("\\sorder\\s+by\\s");
+    private static final Pattern ORDER_PATTERN = Pattern.compile("\\sorder\\s+by\\s");
 
     public static final String STATEMENT_ID_POSTFIX = "_count";
 
@@ -95,7 +96,8 @@ public class PrePaginationInterceptor implements Interceptor {
                     configuration = (Configuration) metaObject.getValue("configuration");
                 }
 
-                String countSql = buildCountSql(originalSql, ms.getId());
+//                String countSql = buildCountSql(originalSql, ms.getId());
+                String countSql = SqlParser.getInstance().parseCountSql(originalSql, ms.getId());
                 long totalCount = this.queryTotal(configuration, executor, ms, originalBoundSql, countSql);
                 page.setTotal(totalCount);
 
@@ -118,17 +120,17 @@ public class PrePaginationInterceptor implements Interceptor {
      */
     private String buildCountSql(String originalSql, String statement) {
         // only auto generate statement optimize select count sql
-        if(AutoGenerateStatementRegistry.getInstance().contains(statement)) {
+        if(StatementRegistry.getInstance().contains(statement)) {
             String loweredString = originalSql.toLowerCase();
 
             // order matcher to optimize `order by`
-            Matcher orderMatcher = orderPattern.matcher(loweredString);
+            Matcher orderMatcher = ORDER_PATTERN.matcher(loweredString);
             if(orderMatcher.find()) {
                 originalSql = originalSql.substring(0, orderMatcher.start());
                 loweredString = loweredString.substring(0, orderMatcher.start());
             }
 
-            Matcher fromMatcher = fromPattern.matcher(loweredString);
+            Matcher fromMatcher = FROM_PATTERN.matcher(loweredString);
             if (fromMatcher.find()) {
                 return "SELECT COUNT(*)" + originalSql.substring(fromMatcher.start());
             } else {

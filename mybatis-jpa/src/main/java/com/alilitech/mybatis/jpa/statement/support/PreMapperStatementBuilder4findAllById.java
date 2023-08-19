@@ -15,17 +15,11 @@
  */
 package com.alilitech.mybatis.jpa.statement.support;
 
-import com.alilitech.mybatis.jpa.definition.GenericType;
 import com.alilitech.mybatis.jpa.meta.ColumnMetaData;
 import com.alilitech.mybatis.jpa.statement.MethodType;
-import com.alilitech.mybatis.jpa.statement.PreMapperStatement;
-import com.alilitech.mybatis.jpa.statement.PreMapperStatementBuilder;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
-import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.Configuration;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -33,62 +27,37 @@ import java.util.stream.Collectors;
  * @author Zhou Xiaoxiang
  * @since 1.0
  */
-public class PreMapperStatementBuilder4findAllById extends PreMapperStatementBuilder {
+public class PreMapperStatementBuilder4findAllById extends BaseSelectPreMapperStatementBuilder {
 
     public PreMapperStatementBuilder4findAllById(Configuration configuration, MapperBuilderAssistant builderAssistant, MethodType methodType) {
         super(configuration, builderAssistant, methodType);
     }
 
     @Override
-    protected void buildPreMapperStatementExtend(PreMapperStatement preMapperStatement, GenericType genericType) {
-
-        preMapperStatement.setSqlCommandType(SqlCommandType.SELECT);
-
-        setNoKeyGenerator(preMapperStatement);
-
-        setFindResultIdOrType(preMapperStatement, genericType);
-    }
-
-    @Override
-    protected String buildSQL() {
-
-        //sql parts
-        List<String> sqlParts = null;
+    protected String generateConditionScript(String mainTableAlias) {
         if(entityMetaData.isCompositePrimaryKey()) {
-            String primaryKeys = entityMetaData.getPrimaryColumnMetaDatas().stream().map(ColumnMetaData::getColumnName).collect(Collectors.joining(", ", "(", ")"));
+            String primaryKeys = entityMetaData.getPrimaryColumnMetaDatas().stream().map(columnMetaData -> {
+                String columnName = columnMetaData.getColumnName();
+                return mainTableAlias + "." + columnName;
+            }).collect(Collectors.joining(", ", "(", ")"));
             String primaryItems = entityMetaData.getPrimaryColumnMetaDatas().stream().map(ColumnMetaData::getProperty).map(s -> "#{id." + s + "}").collect(Collectors.joining(", "));
-
-            sqlParts = Arrays.asList(
-                    "SELECT",
-                    entityMetaData.getColumnNamesString(),
-                    "FROM",
-                    entityMetaData.getTableName(),
-                    "<where>",
+            return String.join(" ",
                     primaryKeys,
                     "IN",
                     "<foreach item=\"id\" index=\"index\" open=\"(\" separator=\",\" close=\")\" collection=\"collection\">",
                     "(" + primaryItems + ")",
-                    "</foreach>",
-                    "</where>"
+                    "</foreach>"
             );
         } else {
-            sqlParts = Arrays.asList(
-                    "SELECT",
-                    entityMetaData.getColumnNamesString(),
-                    "FROM",
-                    entityMetaData.getTableName(),
-                    "<where>",
-                    entityMetaData.getPrimaryColumnMetaData().getColumnName(),
+            return String.join(" ",
+                    mainTableAlias + "." + entityMetaData.getPrimaryColumnMetaData().getColumnName(),
                     "IN",
                     "<foreach item=\"item\" index=\"index\" open=\"(\" separator=\",\" close=\")\" collection=\"collection\">",
                     "#{item}",
-                    "</foreach>",
-                    "</where>"
-            );
+                    "</foreach>");
         }
-
-        return buildScript(sqlParts);
     }
+
 
     protected Class<?> getParameterTypeClass() {
         return entityMetaData.getEntityType();

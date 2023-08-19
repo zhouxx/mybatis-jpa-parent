@@ -42,6 +42,7 @@ import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -153,6 +154,10 @@ public abstract class PreMapperStatementBuilder extends BaseBuilder {
         return entityMetaData.getPrimaryColumnMetaDatas().stream().map(columnMetaData -> columnMetaData.getColumnName() + " = " + "#{" + columnMetaData.getProperty() + "}").collect(Collectors.joining(" AND "));
     }
 
+    protected String buildPrimaryCondition(String alias) {
+        return entityMetaData.getPrimaryColumnMetaDatas().stream().map(columnMetaData -> alias + "." + columnMetaData.getColumnName() + " = " + "#{" + columnMetaData.getProperty() + "}").collect(Collectors.joining(" AND "));
+    }
+
     /**
      * build simple predicate part
      * @param property
@@ -165,12 +170,14 @@ public abstract class PreMapperStatementBuilder extends BaseBuilder {
     /**
      * build sort sql script
      */
-    protected String buildSort() {
+    protected String buildSort(String tableAlias) {
+        String columnPrefix = tableAlias == null ? "" : tableAlias + ".";
         if(methodDefinition.getSortIndex() > -1) {
             String paramName = methodDefinition.isOneParameter() ? "_parameter" : ("arg" + methodDefinition.getSortIndex());
             StringBuilder orderString = new StringBuilder()
                     .append("<if test=\"" + paramName + "!= null\">")
                     .append("<foreach item=\"item\" index=\"index\" open=\"ORDER BY\" separator=\", \" close=\"\" collection=\"" + paramName + ".orders\">")
+                    .append(columnPrefix)
                     .append("${item.property} ${item.direction}")
                     .append("</foreach>")
                     .append("</if>");
@@ -184,7 +191,7 @@ public abstract class PreMapperStatementBuilder extends BaseBuilder {
      * build mybatis script
      */
     protected String buildScript(List<String> sqlParts) {
-        return sqlParts.stream().collect(Collectors.joining(" ", "<script>", "</script>"));
+        return sqlParts.stream().filter(part -> !part.isEmpty()).collect(Collectors.joining(" ", "<script>", "</script>"));
 //        StringBuilder script = new StringBuilder()
 //                .append("<script>")
 //                .append(StringUtils.collectionToDelimitedString(sqlParts, " "))
@@ -265,20 +272,55 @@ public abstract class PreMapperStatementBuilder extends BaseBuilder {
     protected void setFindResultIdOrType(PreMapperStatement preMapperStatement, GenericType genericType) {
         if(resultType != null) {
             preMapperStatement.setResultType(resultType);
+        } else if(methodDefinition.isBaseResultMap() && methodDefinition.isJoinMethod()) {
+            String resultMapId = buildJoinResultMap();
+            preMapperStatement.setResultMap(resultMapId);
         } else if(methodDefinition.isBaseResultMap()) {
             preMapperStatement.setResultMap(ResultMapIdUtils.buildBaseResultMapId(builderAssistant));
         } else if(methodDefinition.isCompositeResultMap()) {
-            String resultMapId = buildResultMap();
+            String resultMapId = buildCompositeResultMap();
             preMapperStatement.setResultMap(resultMapId);
         } else {
             preMapperStatement.setResultType((Class<?>)genericType.getDomainType());
         }
     }
 
+    private String buildJoinResultMap() {
+        String resultMapId = builderAssistant.getCurrentNamespace() + "." + methodDefinition.getMethodName() + "ResultMap";
+        if(configuration.hasResultMap(resultMapId)) {
+            return resultMapId;
+        }
+
+        List<ResultMapping> resultMappings = methodDefinition.getColumnDefinitions().stream().map(columnDefinition ->
+                builderAssistant.buildResultMapping(
+                        columnDefinition.getJavaType(),
+                        columnDefinition.getProperty(),
+                        columnDefinition.getColumnName(),
+                        columnDefinition.getJavaType(),
+                        columnDefinition.getJdbcType(),
+                        null,
+                        null,
+                        null,
+                        null,
+                        columnDefinition.getTypeHandler(),
+                        columnDefinition.isId() ? Collections.singletonList(ResultFlag.ID) : null
+                )).collect(Collectors.toList());
+
+        builderAssistant.addResultMap(
+                resultMapId,
+                entityMetaData.getEntityType(),
+                null,
+                null,
+                resultMappings,
+                true
+        );
+        return resultMapId;
+    }
+
     /**
      * 生成复合查询的ResultMap
      */
-    private String buildResultMap() {
+    private String buildCompositeResultMap() {
 
         String resultMapId = builderAssistant.getCurrentNamespace() + "." + methodDefinition.getMethodName() + "ResultMap";
         if(configuration.hasResultMap(resultMapId)) {
@@ -289,20 +331,38 @@ public abstract class PreMapperStatementBuilder extends BaseBuilder {
 
         for (JoinStatementDefinition joinStatementDefinition : methodDefinition.getJoinStatementDefinitions()) {
 
-            ResultMapping resultMapping = builderAssistant.buildResultMapping(
-                    joinStatementDefinition.getResultType(),
-                    joinStatementDefinition.getProperty(),
-                    joinStatementDefinition.getColumn(),
-                    joinStatementDefinition.getJavaType(),
-                    null,
-                    joinStatementDefinition.getNestedSelect(),
-                    null,
-                    null,
-                    null,
-                    null,
-                    null
-            );
-            mappings.add(resultMapping);
+//            if(resultMapId.equals("com.alilitech.mybatis.jpa.test.mapper.TestUserMapper.findByIdResultMap")) {
+                ResultMapping resultMapping = builderAssistant.buildResultMapping(
+                        joinStatementDefinition.getResultType(),
+                        joinStatementDefinition.getProperty(),
+                        null,
+                        joinStatementDefinition.getJavaType(),
+                        null,
+                        null,
+                        joinStatementDefinition.getNestedSelect() + "ResultMap",
+                        null,
+                        null,
+                        null,
+                        null
+                );
+                mappings.add(resultMapping);
+//            } else {
+//
+//                ResultMapping resultMapping = builderAssistant.buildResultMapping(
+//                        joinStatementDefinition.getResultType(),
+//                        joinStatementDefinition.getProperty(),
+//                        joinStatementDefinition.getColumn(),
+//                        joinStatementDefinition.getJavaType(),
+//                        null,
+//                        joinStatementDefinition.getNestedSelect(),
+//                        null,
+//                        null,
+//                        null,
+//                        null,
+//                        null
+//                );
+//                mappings.add(resultMapping);
+//            }
         }
 
         ResultMap resultMap = builderAssistant.addResultMap(

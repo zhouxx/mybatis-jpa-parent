@@ -31,7 +31,7 @@ import java.util.List;
  */
 public class OrderBuilder<T> extends AbstractSpecificationBuilder<T> {
 
-    private List<OrderExpression<T>> orderExpressions = new ArrayList<>();
+    private final List<OrderExpression<T>> orderExpressions = new ArrayList<>();
 
     public OrderBuilder(SpecificationBuilder<T> specificationBuilder) {
         super(specificationBuilder);
@@ -90,8 +90,11 @@ public class OrderBuilder<T> extends AbstractSpecificationBuilder<T> {
     public void build(CriteriaBuilder cb, CriteriaQuery query) {
         specificationBuilder.build(cb, query);
         // 通过调用toPredicate, 从而达到填充orderExpressions的目的
-        for (int i = 0; i < specifications.size(); i++) {
-            specifications.get(i).toPredicate(cb, query);
+        // 防止重复执行，在查询数量和查询列表的时候这块会重复生成orderExpressions
+        if(orderExpressions.isEmpty()) {
+            for (int i = 0; i < specifications.size(); i++) {
+                specifications.get(i).toPredicate(cb, query);
+            }
         }
         if (orderExpressions != null && !orderExpressions.isEmpty()) {
             query.orderBy(orderExpressions.toArray(new OrderExpression[orderExpressions.size()]));

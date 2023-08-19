@@ -28,12 +28,20 @@ public class ResultMapIdUtils {
     private ResultMapIdUtils() {
     }
 
+    public static String buildId(String namespace, String id) {
+        return namespace + "." + id;
+    }
+
     public static String buildId(MapperBuilderAssistant builderAssistant, String id) {
-        return builderAssistant.getCurrentNamespace() + "." + id;
+        return buildId(builderAssistant.getCurrentNamespace(), id);
+    }
+
+    public static String buildBaseResultMapId(String namespace) {
+        return buildId(namespace, "BaseResultMap");
     }
 
     public static String buildBaseResultMapId(MapperBuilderAssistant builderAssistant) {
-        return buildId(builderAssistant, "BaseResultMap");
+        return buildBaseResultMapId(builderAssistant.getCurrentNamespace());
     }
 
 }

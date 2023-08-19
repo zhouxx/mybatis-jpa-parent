@@ -15,18 +15,9 @@
  */
 package com.alilitech.mybatis.jpa.statement.support;
 
-import com.alilitech.mybatis.jpa.definition.GenericType;
 import com.alilitech.mybatis.jpa.statement.MethodType;
-import com.alilitech.mybatis.jpa.statement.PreMapperStatement;
-import com.alilitech.mybatis.jpa.statement.PreMapperStatementBuilder;
-import com.alilitech.mybatis.jpa.statement.parser.RenderContext;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
-import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.Configuration;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 
 /**
@@ -34,45 +25,22 @@ import java.util.stream.Collectors;
  * @author Zhou Xiaoxiang
  * @since 1.0
  */
-public class PreMapperStatementBuilder4FindById extends PreMapperStatementBuilder {
+public class PreMapperStatementBuilder4FindById extends BaseSelectPreMapperStatementBuilder {
 
     public PreMapperStatementBuilder4FindById(Configuration configuration, MapperBuilderAssistant builderAssistant, MethodType methodType) {
         super(configuration, builderAssistant, methodType);
     }
 
     @Override
-    protected void buildPreMapperStatementExtend(PreMapperStatement preMapperStatement, GenericType genericType) {
-
-        preMapperStatement.setResultType((Class)genericType.getDomainType());
-        preMapperStatement.setSqlCommandType(SqlCommandType.SELECT);
-
-        setNoKeyGenerator(preMapperStatement);
-
-        setFindResultIdOrType(preMapperStatement, genericType);
+    protected String generateConditionScript(String mainTableAlias) {
+        return buildPrimaryCondition(mainTableAlias);
     }
 
-    @Override
-    protected String buildSQL() {
-
-//        RenderContext context = new RenderContext();
-//        buildPartTree().render(context);
-
-        //sql parts
-        List<String> sqlParts = Arrays.asList(
-                "SELECT",
-                entityMetaData.getColumnNamesString(),
-                "FROM",
-                entityMetaData.getTableName(),
-                "<where>",
-                buildPrimaryCondition(),
-                "</where>"
-        );
-
-        return buildScript(sqlParts);
-    }
 
     protected Class<?> getParameterTypeClass() {
         return entityMetaData.getIdType();
     }
+
+
 
 }

@@ -40,7 +40,6 @@ public class RenderContext {
     public RenderContext() {
     }
 
-
     public RenderContext(String variableAlias, String argAlias) {
         this.variableAlias = variableAlias;
         this.argAlias = argAlias;

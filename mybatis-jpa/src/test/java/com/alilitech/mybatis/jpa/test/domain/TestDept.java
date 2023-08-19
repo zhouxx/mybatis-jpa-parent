@@ -1,7 +1,9 @@
 package com.alilitech.mybatis.jpa.test.domain;
 
+import com.alilitech.mybatis.jpa.anotation.ColumnResult;
 import com.alilitech.mybatis.jpa.anotation.GeneratedValue;
 import com.alilitech.mybatis.jpa.parameter.GenerationType;
+import com.alilitech.mybatis.jpa.test.MyObjectTypeHandler;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -33,6 +35,7 @@ public class TestDept {
 
     private String deptNo;
 
+    @ColumnResult(typeHandler = MyObjectTypeHandler.class)
     private String deptName;
 
     @OneToMany(mappedBy = "dept")
