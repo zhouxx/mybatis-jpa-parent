@@ -1,6 +1,13 @@
 # CHANGELOG
 
-## [v2.1.4] 2023.8.14
+## [v2.2.0] 2023.8.19
+
+* feature:  用join查询替换多次查询（关联），以提升性能
+* feature:  提供AbstractObjectTypeHandler，用于对象与字符串之间的转换
+* feature: 字段支持自定义jdbcTypes和TypeHandler，用@ColumnResult
+* fix bug：移除了自定义的BooleanTypeHandler，直接用官方的，解决了部分场景下可能映射会出现错误的情况
+
+## [v2.1.5] 2023.8.14
 
 * fix bug:  修复只使用mybatis-jpa无法使用count分页的问题
 * fix bug:  修复使用mybatis-jpa-spring相关的无法设置枚举属性值的问题
