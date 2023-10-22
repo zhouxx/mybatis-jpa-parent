@@ -16,6 +16,7 @@
 package com.alilitech.mybatis.jpa.parameter;
 
 import com.alilitech.mybatis.jpa.EntityMetaDataRegistry;
+import com.alilitech.mybatis.jpa.criteria.Specification;
 import com.alilitech.mybatis.jpa.meta.EntityMetaData;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.keygen.Jdbc3KeyGenerator;
@@ -53,6 +54,10 @@ public class TriggerValue4Jdbc3KeyGenerator extends Jdbc3KeyGenerator {
                 parameterAssistant.populateKeyAndTriggerValue(mappedStatement, parameter, entityMetaData);
             }
         } else {
+            // Specification's trigger in MybatisJpaDynamicSqlSource
+            if(parameterObject instanceof Specification) {
+                return;
+            }
             EntityMetaData entityMetaData = EntityMetaDataRegistry.getInstance().get(parameterObject.getClass());
             parameterAssistant.populateKeyAndTriggerValue(mappedStatement, parameterObject, entityMetaData);
         }
