@@ -17,8 +17,13 @@ package com.alilitech.mybatis.jpa.criteria.expression;
 
 import com.alilitech.mybatis.jpa.EntityMetaDataRegistry;
 import com.alilitech.mybatis.jpa.criteria.RenderContext;
+import com.alilitech.mybatis.jpa.criteria.SpecificationType;
+import com.alilitech.mybatis.jpa.definition.MethodDefinition;
 import com.alilitech.mybatis.jpa.exception.MybatisJpaException;
 import com.alilitech.mybatis.jpa.meta.EntityMetaData;
+import com.alilitech.mybatis.jpa.statement.parser.PropertyPath;
+
+import java.util.Optional;
 
 /**
  * @author Zhou Xiaoxiang
@@ -27,29 +32,30 @@ import com.alilitech.mybatis.jpa.meta.EntityMetaData;
 public class VariableExpression<T> implements AtomicExpression<T> {
 
     private String originalVariableName;
-    private String variableName;
+    private PropertyPath propertyPath;
 
     public VariableExpression() {
     }
 
-    public VariableExpression(Class<T> domainClass, String variableName) {
+    public VariableExpression(Class<T> domainClass, String variableName, MethodDefinition methodDefinition) {
         this.originalVariableName = variableName;
-        this.setVariableName(domainClass, variableName);
-    }
-
-    public void setVariableName(Class<T> domainClass, String variableName) {
-        EntityMetaData entityMetaData = EntityMetaDataRegistry.getInstance().get(domainClass);
-        if(!entityMetaData.getColumnMetaDataMap().containsKey(variableName)) {
-            throw new MybatisJpaException("Specification property=>" + variableName + " is not exist in class '" + domainClass.getName() + "'");
+        this.propertyPath = PropertyPath.from(variableName, Optional.of(domainClass), methodDefinition);
+        if(methodDefinition.getSpecificationType() == SpecificationType.UPDATE && domainClass != propertyPath.getEntityClass()) {
+            throw new MybatisJpaException("Update specification not support relative property!");
         }
-        // 变量都加上别名，这样方便查询
-        this.variableName = entityMetaData.getTableAlias() + "_0." +
-                entityMetaData.getColumnMetaDataMap().get(variableName).getColumnName();
     }
 
     @Override
     public void render(RenderContext renderContext, Expression<T> ...expressions) {
-        renderContext.renderString(variableName);
+        // 子表
+        if(renderContext.getTableAliasMap().containsKey(propertyPath.getEntityClass())) {
+            renderContext.renderString(renderContext.getTableAliasMap().get(propertyPath.getEntityClass()) + "." + propertyPath.getColumnName());
+        }
+        // 主表
+        else {
+            EntityMetaData entityMetaData = EntityMetaDataRegistry.getInstance().get(propertyPath.getEntityClass());
+            renderContext.renderString(entityMetaData.getTableAlias() + "_0." + propertyPath.getColumnName());
+        }
     }
 
     public String getOriginalVariableName() {

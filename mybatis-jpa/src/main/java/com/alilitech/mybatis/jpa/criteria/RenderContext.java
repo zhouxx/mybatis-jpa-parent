@@ -15,6 +15,12 @@
  */
 package com.alilitech.mybatis.jpa.criteria;
 
+import com.alilitech.mybatis.jpa.definition.JoinStatementDefinition;
+import com.alilitech.mybatis.jpa.statement.parser.PropertyPath;
+import org.springframework.util.StringUtils;
+
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,11 +41,23 @@ public class RenderContext {
 
     private final Map<String, Object> paramValues = new ConcurrentHashMap<>();
 
+    /**
+     * 联表的或子表的表别名, 优先子表渲染
+     */
+    private final Map<Class<?>, String> tableAliasMap = new HashMap<>();
+
     public RenderContext() {
     }
 
     public RenderContext(String paramPrefix) {
         this.paramPrefix = paramPrefix;
+    }
+
+    public RenderContext addJoinTableAliasMap(List<JoinStatementDefinition> joinStatementDefinitions) {
+        for(JoinStatementDefinition joinStatementDefinition : joinStatementDefinitions) {
+            tableAliasMap.put(joinStatementDefinition.getResultType(), joinStatementDefinition.getTableIndexAlias());
+        }
+        return this;
     }
 
     public Integer getParamIndex() {
@@ -66,6 +84,10 @@ public class RenderContext {
         return paramValues;
     }
 
+    public Map<Class<?>, String> getTableAliasMap() {
+        return tableAliasMap;
+    }
+
     public void clearScript() {
         scriptBuilder = new StringBuilder();
     }
@@ -77,4 +99,5 @@ public class RenderContext {
     public void renderBlank() {
         scriptBuilder.append(" ");
     }
+
 }

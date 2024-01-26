@@ -15,18 +15,19 @@
  */
 package com.alilitech.mybatis.jpa.pagination.sqlparser;
 
+import com.alilitech.mybatis.jpa.EntityMetaDataRegistry;
 import com.alilitech.mybatis.jpa.StatementRegistry;
 import com.alilitech.mybatis.jpa.definition.MethodDefinition;
+import com.alilitech.mybatis.jpa.meta.ColumnMetaData;
+import com.alilitech.mybatis.jpa.meta.EntityMetaData;
 import com.alilitech.mybatis.jpa.util.LRUCache;
 import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.*;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -52,86 +53,93 @@ public class SqlParser {
     }
 
     public String parseCountSql(String originalSql, String statementId) throws JSQLParserException {
-        ParseResult parseResult = parse(originalSql, statementId);
+        // custom sql
+        if(!StatementRegistry.getInstance().contains(statementId)) {
+            return String.format("SELECT COUNT(*) FROM ( %s ) TOTAL", originalSql);
+        }
 
-        PlainSelect plainSelect = (PlainSelect) parseResult.getSelect().getSelectBody();
+        ParseResult parseResult = parse(originalSql);
+
+        PlainSelect plainSelect = parseResult.getSelect();
 
         PlainSelect plainSelectCount = new PlainSelect()
                 .withSelectItems(plainSelect.getSelectItems())
                 .withJoins(plainSelect.getJoins())
-                .withOrderByElements(plainSelect.getOrderByElements())
                 .withFromItem(plainSelect.getFromItem())
                 .withWhere(plainSelect.getWhere());
         Select selectCount = new Select().withSelectBody(plainSelectCount);
+        // 只有主表时
         if(parseResult.isOnlyMainTable()) {
             plainSelectCount.setOrderByElements(null);
             plainSelectCount.setJoins(null);
             plainSelectCount.setSelectItems(COUNT_SELECT_COLUMNS);
-            return selectCount.toString();
+        } else {
+            // 有子表时将查询用 count(distinct t_0.id1, t_0.id2), 并将要关联的join带出即可，其它不需要
+            List<SelectItem> countSelectColumnsWithSub = Collections.singletonList(
+                    new SelectExpressionItem(new Column().withColumnName(buildCountSelect(statementId)))
+            );
+
+            plainSelectCount.setSelectItems(countSelectColumnsWithSub);
+
+            List<Join> joins = new ArrayList<>();
+
+            parseResult.getJoinMap().forEach((key, value) -> {
+                if(parseResult.getWhereTables().contains(key)) {
+                    joins.add(value);
+                }
+            });
+            plainSelectCount.setJoins(joins);
         }
-        return null;
+        return selectCount.toString();
     }
 
-    public ParseResult parse(String originalSql, String statementId) throws JSQLParserException {
+    public ParseResult parse(String originalSql) throws JSQLParserException {
         if(sqlParserCache.containsKey(originalSql)) {
             return sqlParserCache.get(originalSql);
         }
 
-        Select select = (Select) CCJSqlParserUtil.parse(originalSql);
+        return new ParseResult(originalSql);
+    }
 
-        PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
-
-        Expression where = plainSelect.getWhere();
-        List<OrderByElement> orderByElements = plainSelect.getOrderByElements();
-
-        // 如果没有where和排序，直接用主表查询，orderBy和join都不要
-        ParseResult parseResult = new ParseResult(select, true);
-        if(where == null && orderByElements == null) {
-            sqlParserCache.put(originalSql, parseResult);
-            return parseResult;
-        }
+    private String buildCountSelect(String statementId) {
         MethodDefinition methodDefinition = StatementRegistry.getInstance().getMethodDefinition(statementId);
 
-        // 是否主表就能查出count, 判断有没有字表的条件参与查询
-        boolean mainTableCount = judgeIsMainTable(where, orderByElements, methodDefinition);
+        EntityMetaData entityMetaData = EntityMetaDataRegistry.getInstance().get(methodDefinition.getMapperDefinition().getGenericType().getDomainType());
 
-        if(mainTableCount) {
-            sqlParserCache.put(originalSql, parseResult);
-            return parseResult;
-        }
+        String mainTableAliasAndDot = entityMetaData.getTableAlias() + "_0.";
 
-        ParseResult result = new ParseResult(select, false);
-        sqlParserCache.put(originalSql, result);
-        return result;
+        List<ColumnMetaData> primaryColumnMetaDatas = entityMetaData.getPrimaryColumnMetaDatas();
+        String selectColumns = primaryColumnMetaDatas.stream().map(columnMetaData -> mainTableAliasAndDot + columnMetaData.getColumnName()).collect(Collectors.joining(", "));
+        return "COUNT(distinct " + selectColumns + ")";
     }
 
     /**
      * 判断是否是主表查询
      */
-    private boolean judgeIsMainTable(Expression where, List<OrderByElement> orderByElements, MethodDefinition methodDefinition) {
-        if(methodDefinition.getJoinStatementDefinitions().isEmpty()) {
-            return true;
-        }
-        List<String> joinTablesAndDot = methodDefinition.getJoinStatementDefinitions().stream().map(joinStatementDefinition -> joinStatementDefinition.getTableIndexAlias() + ".").collect(Collectors.toList());
-        if(where != null) {
-            String whereString = where.toString();
-            Optional<String> optional = joinTablesAndDot.stream().filter(whereString::contains).findFirst();
-            if (optional.isPresent()) {
-                return false;
-            }
-        }
-
-        if(orderByElements != null) {
-            List<String> orderStrings = orderByElements.stream().map(orderByElement -> orderByElement.getExpression().toString()).collect(Collectors.toList());
-            for (String orderString : orderStrings) {
-                Optional<String> optional = joinTablesAndDot.stream().filter(orderString::contains).findFirst();
-                if (optional.isPresent()) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
+//    private boolean judgeIsMainTable(Expression where, List<OrderByElement> orderByElements, MethodDefinition methodDefinition) {
+//        if(methodDefinition.getJoinStatementDefinitions().isEmpty()) {
+//            return true;
+//        }
+//        List<String> joinTablesAndDot = methodDefinition.getJoinStatementDefinitions().stream().map(joinStatementDefinition -> joinStatementDefinition.getTableIndexAlias() + ".").collect(Collectors.toList());
+//        if(where != null) {
+//            String whereString = where.toString();
+//            Optional<String> optional = joinTablesAndDot.stream().filter(whereString::contains).findFirst();
+//            if (optional.isPresent()) {
+//                return false;
+//            }
+//        }
+//
+//        if(orderByElements != null) {
+//            List<String> orderStrings = orderByElements.stream().map(orderByElement -> orderByElement.getExpression().toString()).collect(Collectors.toList());
+//            for (String orderString : orderStrings) {
+//                Optional<String> optional = joinTablesAndDot.stream().filter(orderString::contains).findFirst();
+//                if (optional.isPresent()) {
+//                    return false;
+//                }
+//            }
+//        }
+//
+//        return true;
+//    }
 
 }

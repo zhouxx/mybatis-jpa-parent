@@ -15,12 +15,18 @@
  */
 package com.alilitech.mybatis.jpa.statement.support;
 
+import com.alilitech.mybatis.jpa.criteria.parameter.SpecificationLanguageDriver;
+import com.alilitech.mybatis.jpa.criteria.parameter.SpecificationXMLScriptBuilder;
 import com.alilitech.mybatis.jpa.definition.GenericType;
+import com.alilitech.mybatis.jpa.definition.JoinStatementDefinition;
 import com.alilitech.mybatis.jpa.statement.MethodType;
 import com.alilitech.mybatis.jpa.statement.PreMapperStatement;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.mapping.SqlCommandType;
+import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
+
+import java.util.List;
 
 
 /**
@@ -65,7 +71,7 @@ public class PreMapperStatementBuilder4FindSpecification extends BaseSelectPreMa
 //    }
 
     @Override
-    protected String generateConditionScript(String mainTableAlias) {
+    protected String generateConditionScript(String mainTableAlias, List<JoinStatementDefinition> joinStatementDefinitions) {
         return String.join(" ",
                 "<if test=\"_parameter != null and _parameter.whereScript != null\">",
                 "${_parameter.whereScript}",
@@ -85,4 +91,8 @@ public class PreMapperStatementBuilder4FindSpecification extends BaseSelectPreMa
         return entityMetaData.getEntityType();
     }
 
+    @Override
+    protected LanguageDriver getLanguageDriver(String lang) {
+        return new SpecificationLanguageDriver(methodDefinition);
+    }
 }

@@ -18,6 +18,7 @@ package com.alilitech.mybatis.jpa.statement.support;
 import com.alilitech.mybatis.jpa.SubQueryContainer;
 import com.alilitech.mybatis.jpa.anotation.SubQuery;
 import com.alilitech.mybatis.jpa.definition.GenericType;
+import com.alilitech.mybatis.jpa.definition.JoinStatementDefinition;
 import com.alilitech.mybatis.jpa.statement.MethodType;
 import com.alilitech.mybatis.jpa.statement.PreMapperStatement;
 import com.alilitech.mybatis.jpa.statement.parser.PartTree;
@@ -110,8 +111,8 @@ public class PreMapperStatementBuilder4Find extends BaseSelectPreMapperStatement
     }
 
     @Override
-    protected String generateConditionScript(String mainTableAlias) {
-        RenderContext context = new RenderContext(mainTableAlias, null);
+    protected String generateConditionScript(String mainTableAlias, List<JoinStatementDefinition> joinStatementDefinitions) {
+        RenderContext context = new RenderContext(mainTableAlias, null, joinStatementDefinitions);
         partTree.render(context);
 
         /*

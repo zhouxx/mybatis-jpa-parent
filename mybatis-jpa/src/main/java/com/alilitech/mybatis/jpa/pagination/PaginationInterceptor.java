@@ -20,6 +20,8 @@ import com.alilitech.mybatis.dialect.SqlDialectFactory;
 import com.alilitech.mybatis.jpa.EntityMetaDataRegistry;
 import com.alilitech.mybatis.jpa.StatementRegistry;
 import com.alilitech.mybatis.jpa.definition.MethodDefinition;
+import com.alilitech.mybatis.jpa.meta.ColumnMetaData;
+import com.alilitech.mybatis.jpa.meta.EntityMetaData;
 import com.alilitech.mybatis.jpa.pagination.sqlparser.ParseResult;
 import com.alilitech.mybatis.jpa.pagination.sqlparser.SqlParser;
 import com.alilitech.mybatis.jpa.pagination.sqlparser.SqlSelectBody;
@@ -42,10 +44,8 @@ import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.RowBounds;
 
-import java.lang.reflect.Type;
 import java.sql.Connection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -95,13 +95,13 @@ public class PaginationInterceptor implements Interceptor {
             // add since v1.2.7
             Connection connection = (Connection) invocation.getArgs()[0];
             SqlDialectFactory sqlDialectFactory;
-            if(page.getDatabaseType() == null) {
+            if (page.getDatabaseType() == null) {
                 // add since v1.2.8 use autoDialect
-                if(this.mybatisJpaProperties.getPage().isAutoDialect()) {
+                if (this.mybatisJpaProperties.getPage().isAutoDialect()) {
                     String databaseProductName = connection.getMetaData().getDatabaseProductName();
                     sqlDialectFactory = new SqlDialectFactory(databaseProductName);
 
-                    if(sqlDialectFactory.getDatabaseType() == null) {
+                    if (sqlDialectFactory.getDatabaseType() == null) {
                         log.warn("The databaseId of current connection used auto dialect do not has databaseType in com.alilitech.mybatis.jpa.DatabaseTypeRegistry, it will use mybatis configuration's databaseId!");
                         // get the configuration and instantiate a SqlDialectFactory
                         Configuration configuration = (Configuration) metaObject.getValue("delegate.configuration");
@@ -130,18 +130,26 @@ public class PaginationInterceptor implements Interceptor {
      * 生成需要跟分页参数拼接的sql
      */
     private String generateToPageSql(String statementId, String originalSql, SqlDialectFactory sqlDialectFactory, Pagination<?> page) throws JSQLParserException {
-        ParseResult parseResult = SqlParser.getInstance().parse(originalSql, statementId);
+        // custom sql
+        if(!StatementRegistry.getInstance().contains(statementId)) {
+            return sqlDialectFactory.buildPaginationSql(page, originalSql);
+        }
 
-        Select select = parseResult.getSelect();
+        ParseResult parseResult = SqlParser.getInstance().parse(originalSql);
+
+        // 如果没有关联查询，则直接拼接
+        if(parseResult.isJoinEmpty()) {
+            return sqlDialectFactory.buildPaginationSql(page, originalSql);
+        }
 
         MethodDefinition methodDefinition = StatementRegistry.getInstance().getMethodDefinition(statementId);
-        Type domainType = methodDefinition.getMapperDefinition().getGenericType().getDomainType();
-        String mainTableAlias = EntityMetaDataRegistry.getInstance().get(domainType).getTableAlias() + "_0";
+        EntityMetaData entityMetaData = EntityMetaDataRegistry.getInstance().get(methodDefinition.getMapperDefinition().getGenericType().getDomainType());
+        String mainTableAlias = entityMetaData.getTableAlias() + "_0";
 
-        PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
+        PlainSelect plainSelect = parseResult.getSelect();
         List<SelectItem> selectItems = plainSelect.getSelectItems();
 
-        // 基于原始的解析copy一个
+        // 基于原始的解析copy一个，也是
         PlainSelect plainSelectPage = new PlainSelect()
                 .withSelectItems(plainSelect.getSelectItems())
                 .withJoins(plainSelect.getJoins())
@@ -149,29 +157,66 @@ public class PaginationInterceptor implements Interceptor {
                 .withFromItem(plainSelect.getFromItem())
                 .withWhere(plainSelect.getWhere());
 
-        // 只有主表
-        if(parseResult.isOnlyMainTable()) {
-            List<SelectItem> items = selectItems.stream()
-                    .filter(selectItem -> Objects.equals(mainTableAlias, ((Column)((SelectExpressionItem) selectItem).getExpression()).getTable().getName()))
+
+        PlainSelect plainSelectFrom;
+        // 只有主表时，直接不需要join，加条件和排序，再加分页作为子表
+        if (parseResult.isOnlyMainTable()) {
+            List<SelectItem> mainTableItems = selectItems.stream()
+                    .filter(selectItem -> Objects.equals(mainTableAlias, ((Column) ((SelectExpressionItem) selectItem).getExpression()).getTable().getName()))
                     .collect(Collectors.toList());
-            PlainSelect plainSelectFrom = new PlainSelect()
-                    .withSelectItems(items)
+            plainSelectFrom = new PlainSelect()
+                    .withSelectItems(mainTableItems)
                     .withFromItem(plainSelect.getFromItem())
                     .withWhere(plainSelect.getWhere())
                     .withOrderByElements(plainSelect.getOrderByElements());
-            String paginationSql = sqlDialectFactory.buildPaginationSql(page, plainSelectFrom.toString());
 
-            SqlSelectBody sqlSelectBody = new SqlSelectBody().withSql(paginationSql);
+        } else {
+            // 非主表时分有没有子表的排序，如果没有
+            // 则子查询是：查询主表字段，关联有条件的表，再加上条件，group by主表的主键，并limit
+            // 最后外层再套一层查询，作为最终查询
+            List<SelectItem> mainTableItems = selectItems.stream()
+                    .filter(selectItem -> Objects.equals(mainTableAlias, ((Column) ((SelectExpressionItem) selectItem).getExpression()).getTable().getName()))
+                    .collect(Collectors.toList());
+            // 准备join
+            Set<Join> joins = new LinkedHashSet<>();
+            parseResult.getJoinMap().forEach((key, value) -> {
+                if (parseResult.getWhereTables().contains(key)) {
+                    joins.add(value);
+                }
+                if (parseResult.getOrderTables().contains(key)) {
+                    joins.add(value);
+                }
+            });
 
-            SubSelect subSelect = new SubSelect().withSelectBody(sqlSelectBody).withAlias(new Alias(mainTableAlias, false));
+            plainSelectFrom = new PlainSelect()
+                    .withSelectItems(mainTableItems)
+                    .withFromItem(plainSelect.getFromItem())
+                    .withWhere(plainSelect.getWhere())
+                    .withOrderByElements(plainSelect.getOrderByElements())
+                    .withJoins(new ArrayList<>(joins));
 
-            plainSelectPage.setFromItem(subSelect);
-            // 外层查询不需要where与orderBy了
-            plainSelectPage.setWhere(null);
-            plainSelectPage.setOrderByElements(null);
-            return new Select().withSelectBody(plainSelectPage).toString();
+            // 准备group by column
+            Set<String> primaryKeys = entityMetaData.getPrimaryColumnMetaDatas().stream().map(ColumnMetaData::getColumnName).collect(Collectors.toSet());
+
+            List<Column> primaryColumns = mainTableItems.stream()
+                    .map(selectItem -> (Column) ((SelectExpressionItem) selectItem).getExpression())
+                    .filter(column -> primaryKeys.contains(column.getColumnName()))
+                    .collect(Collectors.toList());
+            primaryColumns.forEach(plainSelectFrom::addGroupByColumnReference);
+
         }
 
-        return null;
+        String paginationSql = sqlDialectFactory.buildPaginationSql(page, plainSelectFrom.toString());
+
+        SqlSelectBody sqlSelectBody = new SqlSelectBody().withSql(paginationSql);
+
+        SubSelect subSelect = new SubSelect().withSelectBody(sqlSelectBody).withAlias(new Alias(mainTableAlias, false));
+
+        plainSelectPage.setFromItem(subSelect);
+        // 外层查询不需要where与orderBy了
+        plainSelectPage.setWhere(null);
+        plainSelectPage.setOrderByElements(null);
+        return new Select().withSelectBody(plainSelectPage).toString();
+
     }
 }

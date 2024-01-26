@@ -18,6 +18,7 @@ package com.alilitech.mybatis.jpa.criteria;
 import com.alilitech.mybatis.jpa.EntityMetaDataRegistry;
 import com.alilitech.mybatis.jpa.anotation.Trigger;
 import com.alilitech.mybatis.jpa.criteria.expression.*;
+import com.alilitech.mybatis.jpa.definition.MethodDefinition;
 import com.alilitech.mybatis.jpa.meta.ColumnMetaData;
 import com.alilitech.mybatis.jpa.meta.EntityMetaData;
 import com.alilitech.mybatis.jpa.parameter.TriggerValueType;
@@ -49,14 +50,18 @@ public class CriteriaQuery<T> {
 
     private String orderByScript;
 
-    public CriteriaQuery(Class<T> returnType) {
+    private MethodDefinition methodDefinition;
+
+    public CriteriaQuery(Class<T> returnType, MethodDefinition methodDefinition) {
         this.returnType = returnType;
+        this.methodDefinition = methodDefinition;
+        renderContext.addJoinTableAliasMap(methodDefinition.getJoinStatementDefinitions());
     }
 
-    public CriteriaQuery(Class<T> returnType, PredicateExpression.BooleanOperator booleanOperator) {
-        this(returnType);
-        this.booleanOperator = booleanOperator;
-    }
+//    public CriteriaQuery(Class<T> returnType, PredicateExpression.BooleanOperator booleanOperator) {
+//        this(returnType);
+//        this.booleanOperator = booleanOperator;
+//    }
 
     public CriteriaQuery<T> update(SetExpression<T>... setExpressions) {
         // 保存用户设置的更新列名
@@ -102,7 +107,7 @@ public class CriteriaQuery<T> {
             Trigger codeTrigger = StatementAssistant.getJavaCodeTrigger(columnMetaData, SqlCommandType.UPDATE);
             // 有触发器，并且前面没有设置set
             if(codeTrigger != null && !setColumnNames.contains(columnMetaData.getProperty())) {
-                SetExpression<T> setExpression = new SetExpression<>(new VariableExpression<>(returnType, columnMetaData.getProperty()), new ParameterExpression<>("@{" + columnMetaData.getProperty() + "}"));
+                SetExpression<T> setExpression = new SetExpression<>(new VariableExpression<>(returnType, columnMetaData.getProperty(), methodDefinition), new ParameterExpression<>("@{" + columnMetaData.getProperty() + "}"));
                 setExpression.render(renderContext);
                 renderContext.renderString(split);
             }

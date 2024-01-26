@@ -15,6 +15,7 @@
  */
 package com.alilitech.mybatis.jpa.domain;
 
+import com.alilitech.mybatis.jpa.statement.parser.PropertyPath;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
@@ -28,6 +29,8 @@ public class Order {
     @ApiModelProperty(hidden = true)
     private String property;
 
+    private transient PropertyPath propertyPath;
+
     public static final Direction DEFAULT_DIRECTION = Direction.ASC;
 
     public Order() {
@@ -36,6 +39,12 @@ public class Order {
     public Order(Direction direction,String property) {
         this.direction = direction;
         this.property = property;
+    }
+
+    public Order(Direction direction, PropertyPath propertyPath) {
+        this.direction = direction;
+        this.propertyPath = propertyPath;
+        this.property = propertyPath.getColumnName();
     }
 
     public Order(String property) {
@@ -56,6 +65,10 @@ public class Order {
 
     public void setProperty(String property) {
         this.property = property;
+    }
+
+    public PropertyPath getPropertyPath() {
+        return propertyPath;
     }
 
     @Override

@@ -15,11 +15,13 @@
  */
 package com.alilitech.mybatis.jpa.statement.support;
 
+import com.alilitech.mybatis.jpa.definition.JoinStatementDefinition;
 import com.alilitech.mybatis.jpa.meta.ColumnMetaData;
 import com.alilitech.mybatis.jpa.statement.MethodType;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.session.Configuration;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -34,7 +36,7 @@ public class PreMapperStatementBuilder4findAllById extends BaseSelectPreMapperSt
     }
 
     @Override
-    protected String generateConditionScript(String mainTableAlias) {
+    protected String generateConditionScript(String mainTableAlias, List<JoinStatementDefinition> joinStatementDefinitions) {
         if(entityMetaData.isCompositePrimaryKey()) {
             String primaryKeys = entityMetaData.getPrimaryColumnMetaDatas().stream().map(columnMetaData -> {
                 String columnName = columnMetaData.getColumnName();

@@ -16,11 +16,14 @@
 package com.alilitech.mybatis.jpa.statement.support;
 
 import com.alilitech.mybatis.jpa.definition.GenericType;
+import com.alilitech.mybatis.jpa.definition.JoinStatementDefinition;
 import com.alilitech.mybatis.jpa.statement.MethodType;
 import com.alilitech.mybatis.jpa.statement.PreMapperStatement;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.Configuration;
+
+import java.util.List;
 
 /**
  *
@@ -44,7 +47,7 @@ public class PreMapperStatementBuilder4FindAll extends BaseSelectPreMapperStatem
     }
 
     @Override
-    protected String generateConditionScript(String mainTableAlias) {
+    protected String generateConditionScript(String mainTableAlias, List<JoinStatementDefinition> joinStatementDefinitions) {
         return "";
     }
 

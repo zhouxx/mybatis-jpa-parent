@@ -17,7 +17,6 @@ package com.alilitech.mybatis.jpa.statement.parser;
 
 import com.alilitech.mybatis.jpa.definition.MethodDefinition;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import java.util.Optional;
 
@@ -41,7 +40,7 @@ public class NoArgPart implements Render {
 
     @Override
     public void render(RenderContext context) {
-        context.renderString(StringUtils.isEmpty(context.getVariableAlias()) ? propertyPath.getColumnName() : context.getVariableAlias() + "." + propertyPath.getColumnName());
+        context.renderPropertyPathVariable(propertyPath);
         context.renderBlank();
         context.renderString(condition);
     }

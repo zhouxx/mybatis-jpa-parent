@@ -113,7 +113,7 @@ public class JpaTest {
 
         //非空更新
         testUser = new TestUser();
-        testUser.setId("1");
+        testUser.setTestUserId("1");
         testUser.setName("Jackson");
         testUserMapper.updateSelective(testUser);
 
@@ -123,6 +123,30 @@ public class JpaTest {
         testUserMapper.updateBatch(Arrays.asList(testUser1, testUser2));
 
     }
+
+    /**
+     * 子表查询条件与排序演示
+     */
+    @Test
+    public void findTestSubTable() {
+        List<TestUser> testUsers = testUserMapper.findByRolesRoleName("4");
+        System.out.println(testUsers);
+        testUsers = testUserMapper.findByRolesRoleNameLikeAndName("4", "Test");
+        System.out.println(testUsers);
+
+        Page<Object> page = Page.of(1, 2);
+
+        testUsers = testUserMapper.findByRolesRoleNameLike(page, "4", "Test");
+        System.out.println(testUsers);
+
+        testUsers = testUserMapper.findByRolesRoleNameLikeOrderByRolesRoleNameDesc(page, "4", "Test");
+        System.out.println(testUsers);
+
+        testUsers = testUserMapper.findCustomSpecification(Specifications.<TestUser>and().like("rolesRoleName", "4")
+                .order().asc("rolesRoleName").build());
+        System.out.println(testUsers);
+    }
+
 
     /**
      * 查询演示
@@ -139,7 +163,7 @@ public class JpaTest {
 
         //设置排序参数，如果是接口，可直接让前端传过来
         Sort sort = new Sort();
-        sort.setOrders(Arrays.asList(new Order(Direction.DESC, "id")));
+        sort.setOrders(Arrays.asList(new Order(Direction.DESC, "testUserId")));
 
         //CrudMapper 自带的查询演示
         System.out.println(testUserMapper.findAll());
@@ -180,21 +204,21 @@ public class JpaTest {
 
         //代码构建，只需要传入{@link Specification}对象
         //WHERE ( dept_no = ? AND ( age > ? AND name like ?) ) order by name ASC
-//        List<TestUser> testUsers = testUserMapper.findAllSpecification(Specifications.<TestUser>and()
-//                .equal("deptNo", "002")
-//                .nested(builder -> {
-//                    builder.and()
-//                            .greaterThan(age != null, "age", age)
-//                            .like("name", "Jack");
-//                })
-//                .order().asc("name").build());
-//
-//        System.out.println(testUsers);
+        List<TestUser> testUsers = testUserMapper.findAllSpecification(Specifications.<TestUser>and()
+                .equal("deptNo", "002")
+                .nested(builder -> {
+                    builder.and()
+                            .greaterThan(age != null, "age", age)
+                            .like("name", "Jack");
+                })
+                .order().asc("name").build());
+
+        System.out.println(testUsers);
 
         //同样传入page参数，即可分页
         Page page = new Page(1, 2);
 
-        List<TestUser> testUsers = testUserMapper.findPageSpecification(page, Specifications.<TestUser>and()
+        testUsers = testUserMapper.findPageSpecification(page, Specifications.<TestUser>and()
                 .equal("deptNo", "002")
                 .order().asc("name").build());
 
@@ -237,6 +261,9 @@ public class JpaTest {
         testUserMapper.deleteByNameAndDeptNo("Jackson", "002");
     }
 
+    /**
+     * 复合主键的插入、更新、查询
+     */
     @Test
     public void userRoleTest() {
 

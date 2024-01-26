@@ -39,12 +39,12 @@ public class SimplePart implements Render {
 
     @Override
     public void render(RenderContext context) {
-        context.renderString(StringUtils.isEmpty(context.getVariableAlias()) ? propertyPath.getColumnName() : context.getVariableAlias() + "." + propertyPath.getColumnName());
+        context.renderPropertyPathVariable(propertyPath);
         context.renderBlank();
         context.renderString("=");
         context.renderBlank();
         context.renderString("#{");
-        context.renderString(StringUtils.isEmpty(context.getArgAlias()) ? propertyPath.getName() : context.getArgAlias() + "." + propertyPath.getName());
+        context.renderPropertyPathArg(propertyPath);
         context.renderString("}");
     }
 }

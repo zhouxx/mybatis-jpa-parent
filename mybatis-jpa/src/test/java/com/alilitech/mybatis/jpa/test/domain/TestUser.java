@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  CREATE TABLE `t_user`(
- `id` VARCHAR(32) NOT NULL,
+ `test_user_id` VARCHAR(32) NOT NULL,
  `name` VARCHAR(100),
  `sex` TINYINT,
  `age` INT,
@@ -21,12 +21,6 @@ import java.util.List;
  `dept_no` VARCHAR(50),
  PRIMARY KEY (`id`)
  );
- insert into `test`.`t_user` (`id`, `name`, `sex`, `age`, `createTime`) values ('1', 'Jack', '0', '21', '2018-07-25 14:01:54')
- INSERT INTO `test1`.`t_user` (`id`, `name`, `sex`, `age`, `createTime`) VALUES ('1', 'Hellen', '1', '23', '2018-07-25 14:01:54')
- ------------------------
- ALTER TABLE `test`.`t_user`
- ADD COLUMN `dept_no` VARCHAR(50) NULL AFTER `createTime`;
-
  * Created by zhouxx on 2018/7/25.
  */
 @Table(name = "t_user")
@@ -34,7 +28,7 @@ public class TestUser {
 
     @Id
     @GeneratedValue(GenerationType.AUTO)
-    private String id;
+    private String testUserId;
 
     private String name;
 
@@ -69,7 +63,7 @@ public class TestUser {
     //ManyToMany演示
     @ManyToMany
     @JoinTable(name = "user_role",
-            joinColumns = @JoinColumn(name = "userId", referencedColumnName = "id"),
+            joinColumns = @JoinColumn(name = "userId", referencedColumnName = "testUserId"),
             inverseJoinColumns = @JoinColumn(name = "roleId", referencedColumnName = "id"))
     //子查询演示
     @SubQuery(
@@ -80,20 +74,20 @@ public class TestUser {
     public TestUser() {
     }
 
-    public TestUser(String id, String name, Sex sex, Integer age, String deptNo) {
-        this.id = id;
+    public TestUser(String testUserId, String name, Sex sex, Integer age, String deptNo) {
+        this.testUserId = testUserId;
         this.name = name;
         this.sex = sex;
         this.age = age;
         this.deptNo = deptNo;
     }
 
-    public String getId() {
-        return id;
+    public String getTestUserId() {
+        return testUserId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setTestUserId(String testUserId) {
+        this.testUserId = testUserId;
     }
 
     public String getName() {
@@ -155,7 +149,7 @@ public class TestUser {
     @Override
     public String toString() {
         return "TestUser{" +
-                "id='" + id + '\'' +
+                "testUserId='" + testUserId + '\'' +
                 ", name='" + name + '\'' +
                 ", sex=" + sex +
                 ", age=" + age +

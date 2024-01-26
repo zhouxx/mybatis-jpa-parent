@@ -93,8 +93,8 @@ public class OrderBySource implements Render {
             String propertyName = StringUtils.uncapitalize(propertyString);
             //生成PropertyPath
             PropertyPath propertyPath = PropertyPath.from(propertyName, domainClass, methodDefinition);
-            String columnName = propertyPath.getColumnName();
-            this.orders.add(new Order(direction, columnName));
+//            String columnName = propertyPath.getColumnName();
+            this.orders.add(new Order(direction, propertyPath));
         }
     }
 
@@ -105,7 +105,7 @@ public class OrderBySource implements Render {
             String delim = "";
             for(Order order : orders) {
                 context.renderString(delim);
-                context.renderString(StringUtils.isEmpty(context.getVariableAlias()) ? order.getProperty() : context.getVariableAlias() + "." + order.getProperty());
+                context.renderPropertyPathVariable(order.getPropertyPath());
                 context.renderBlank();
                 context.renderString(order.getDirection().toString());
                 delim = ", ";

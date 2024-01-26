@@ -10,6 +10,16 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import java.util.List;
 
+/**
+ * CREATE TABLE `t_role` (
+ *   `id` varchar(255)  NOT NULL,
+ *   `role_name` varchar(255)  DEFAULT NULL,
+ *   `role_code` varchar(255)  DEFAULT NULL,
+ *   `role_description` varchar(255) DEFAULT NULL COMMENT '角色描述',
+ *   PRIMARY KEY (`id`)
+ * )
+ * COMMENT='角色';
+ */
 @Table(name = "t_role")
 @Getter
 @Setter

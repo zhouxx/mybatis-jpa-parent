@@ -15,12 +15,14 @@
  */
 package com.alilitech.mybatis.jpa.statement.support;
 
+import com.alilitech.mybatis.jpa.criteria.parameter.SpecificationLanguageDriver;
 import com.alilitech.mybatis.jpa.definition.GenericType;
 import com.alilitech.mybatis.jpa.statement.MethodType;
 import com.alilitech.mybatis.jpa.statement.PreMapperStatement;
 import com.alilitech.mybatis.jpa.statement.PreMapperStatementBuilder;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.mapping.SqlCommandType;
+import org.apache.ibatis.scripting.LanguageDriver;
 import org.apache.ibatis.session.Configuration;
 
 import java.util.Arrays;
@@ -70,4 +72,8 @@ public class PreMapperStatementBuilder4UpdateSpecification extends PreMapperStat
         return entityMetaData.getEntityType();
     }
 
+    @Override
+    protected LanguageDriver getLanguageDriver(String lang) {
+        return new SpecificationLanguageDriver(methodDefinition);
+    }
 }

@@ -38,6 +38,12 @@ public interface TestUserMapper extends CrudMapper<TestUser, String>, PageMapper
 
     List<TestUser> findByNameLike(String name);
 
+    List<TestUser> findByRolesRoleName(String roleName);
+
+    List<TestUser> findByRolesRoleNameLikeAndName(String roleName, String name);
+    List<TestUser> findByRolesRoleNameLike(Pageable pageable, String roleName, String name);
+    List<TestUser> findByRolesRoleNameLikeOrderByRolesRoleNameDesc(Pageable pageable, String roleName, String name);
+
     Integer countByNameAndDeptNo(String name, String deptNo);
 
     Boolean existsByDeptNo(String deptNo);

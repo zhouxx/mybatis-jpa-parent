@@ -15,9 +15,12 @@
  */
 package com.alilitech.mybatis.jpa.statement.support;
 
+import com.alilitech.mybatis.jpa.definition.JoinStatementDefinition;
 import com.alilitech.mybatis.jpa.statement.MethodType;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.apache.ibatis.session.Configuration;
+
+import java.util.List;
 
 
 /**
@@ -32,7 +35,7 @@ public class PreMapperStatementBuilder4FindById extends BaseSelectPreMapperState
     }
 
     @Override
-    protected String generateConditionScript(String mainTableAlias) {
+    protected String generateConditionScript(String mainTableAlias, List<JoinStatementDefinition> joinStatementDefinitions) {
         return buildPrimaryCondition(mainTableAlias);
     }
 

@@ -16,21 +16,12 @@
 package com.alilitech.mybatis.jpa.parameter;
 
 import com.alilitech.mybatis.jpa.EntityMetaDataRegistry;
-import com.alilitech.mybatis.jpa.anotation.Trigger;
-import com.alilitech.mybatis.jpa.criteria.CriteriaBuilder;
-import com.alilitech.mybatis.jpa.criteria.CriteriaQuery;
-import com.alilitech.mybatis.jpa.criteria.Specification;
-import com.alilitech.mybatis.jpa.criteria.UpdateSpecification;
-import com.alilitech.mybatis.jpa.criteria.expression.PredicateExpression;
 import com.alilitech.mybatis.jpa.domain.Order;
 import com.alilitech.mybatis.jpa.domain.Sort;
 import com.alilitech.mybatis.jpa.exception.MybatisJpaException;
-import com.alilitech.mybatis.jpa.meta.ColumnMetaData;
 import com.alilitech.mybatis.jpa.meta.EntityMetaData;
 import org.apache.ibatis.binding.MapperMethod;
 import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.SqlCommandType;
-import org.apache.ibatis.parsing.GenericTokenParser;
 import org.apache.ibatis.scripting.xmltags.DynamicSqlSource;
 import org.apache.ibatis.scripting.xmltags.SqlNode;
 import org.apache.ibatis.session.Configuration;
@@ -77,46 +68,6 @@ public class MybatisJpaDynamicSqlSource extends DynamicSqlSource {
                     break;
                 }
             }
-        }
-
-        // 转换规格查询参数
-        if(parameterObject instanceof Specification && domainType != null) {
-            Specification specification = (Specification<?>) parameterObject;
-
-            CriteriaBuilder<?> cb = new CriteriaBuilder<>(domainType);
-
-            CriteriaQuery<?> query = new CriteriaQuery<>(domainType);
-
-            PredicateExpression<?> predicate = specification.toPredicate(cb, query);
-
-            if(predicate != null) {
-                query.where(predicate);
-            }
-
-            // 更新时替换触发器相关值
-            if(parameterObject instanceof UpdateSpecification) {
-                Map<String, Object> paramValues = query.getParamValues();
-                Map<String, ColumnMetaData> columnMetaDataMap = EntityMetaDataRegistry.getInstance().get(domainType).getColumnMetaDataMap();
-                for (Map.Entry<String, Object> entry : paramValues.entrySet()) {
-                    String key = entry.getKey();
-                    Object value = entry.getValue();
-                    if (value instanceof String) {
-                        String valString = (String) value;
-                        if (valString.startsWith("@{") && valString.endsWith("}")) {
-                            String property = new GenericTokenParser("@{", "}", content -> content).parse(valString);
-                            ColumnMetaData columnMetaData = columnMetaDataMap.get(property);
-                            Trigger trigger = ParameterAssistant.getTrigger(columnMetaData, SqlCommandType.UPDATE);
-                            if(trigger == null) {
-                                continue;
-                            }
-                            Object triggerValue = ParameterAssistant.getTriggerValue(columnMetaData, trigger);
-                            paramValues.put(key, triggerValue);
-                        }
-                    }
-                }
-            }
-
-            parameterObject = query;
         }
 
         return super.getBoundSql(parameterObject);

@@ -19,6 +19,7 @@ import com.alilitech.mybatis.jpa.criteria.expression.*;
 import com.alilitech.mybatis.jpa.criteria.expression.operator.OperatorExpression;
 import com.alilitech.mybatis.jpa.criteria.expression.operator.comparison.*;
 import com.alilitech.mybatis.jpa.criteria.expression.operator.like.*;
+import com.alilitech.mybatis.jpa.definition.MethodDefinition;
 import com.alilitech.mybatis.jpa.domain.Direction;
 import org.apache.ibatis.reflection.property.PropertyNamer;
 
@@ -36,8 +37,11 @@ public class CriteriaBuilder<T> {
 
     private final Class<T> domainClass;
 
-    public CriteriaBuilder(Class<T> domainClass) {
+    private MethodDefinition methodDefinition;
+
+    public CriteriaBuilder(Class<T> domainClass, MethodDefinition methodDefinition) {
         this.domainClass = domainClass;
+        this.methodDefinition = methodDefinition;
     }
 
     public PredicateExpression<T> and(PredicateExpression<T> ...predicates) {
@@ -194,7 +198,7 @@ public class CriteriaBuilder<T> {
     }
 
     private PredicateExpression<T> buildPredicate(String property, OperatorExpression<T> operator, Object ...values) {
-        VariableExpression<T> variable = new VariableExpression<>(domainClass, property);
+        VariableExpression<T> variable = new VariableExpression<>(domainClass, property, methodDefinition);
         if(values != null && values.length > 0) {
             List<ParameterExpression<T>> parameters = Arrays.stream(values).map((Function<Object, ParameterExpression<T>>) ParameterExpression::new).collect(Collectors.toList());
             return new SinglePredicateExpression<>(variable, operator, parameters);
@@ -208,30 +212,30 @@ public class CriteriaBuilder<T> {
     }
 
     public OrderExpression<T> desc(String property) {
-        VariableExpression<T> variable = new VariableExpression<>(domainClass, property);
+        VariableExpression<T> variable = new VariableExpression<>(domainClass, property, methodDefinition);
         return new OrderExpression<>(variable, Direction.DESC);
     }
 
     public <R> OrderExpression<T> desc(SerializableFunction<T, R> propertyFunction) {
-        VariableExpression<T> variable = new VariableExpression<>(domainClass, getProperty(propertyFunction));
+        VariableExpression<T> variable = new VariableExpression<>(domainClass, getProperty(propertyFunction), methodDefinition);
         return new OrderExpression<>(variable, Direction.DESC);
     }
 
     public OrderExpression<T> asc(String property) {
-        VariableExpression<T> variable = new VariableExpression<>(domainClass, property);
+        VariableExpression<T> variable = new VariableExpression<>(domainClass, property, methodDefinition);
         return new OrderExpression<>(variable, Direction.ASC);
     }
 
     public <R> OrderExpression<T> asc(SerializableFunction<T, R> propertyFunction) {
-        VariableExpression<T> variable = new VariableExpression<>(domainClass, getProperty(propertyFunction));
+        VariableExpression<T> variable = new VariableExpression<>(domainClass, getProperty(propertyFunction), methodDefinition);
         return new OrderExpression<>(variable, Direction.ASC);
     }
 
     public SetExpression<T> set(String property, Object value) {
-        return new SetExpression<>(new VariableExpression<>(domainClass, property), new ParameterExpression<>(value));
+        return new SetExpression<>(new VariableExpression<>(domainClass, property, methodDefinition), new ParameterExpression<>(value));
     }
 
     public <R> SetExpression<T> set(SerializableFunction<T, R> propertyFunction, Object value) {
-        return new SetExpression<>(new VariableExpression<>(domainClass, getProperty(propertyFunction)), new ParameterExpression<>(value));
+        return new SetExpression<>(new VariableExpression<>(domainClass, getProperty(propertyFunction), methodDefinition), new ParameterExpression<>(value));
     }
 }

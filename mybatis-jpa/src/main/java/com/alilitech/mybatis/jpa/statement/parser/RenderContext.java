@@ -15,6 +15,13 @@
  */
 package com.alilitech.mybatis.jpa.statement.parser;
 
+import com.alilitech.mybatis.jpa.definition.JoinStatementDefinition;
+import org.springframework.util.StringUtils;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * render context
  * @author Zhou Xiaoxiang
@@ -37,6 +44,11 @@ public class RenderContext {
      */
     private String argAlias;
 
+    /**
+     * 关联表的或子表的RenderContext,  优先子表渲染
+     */
+    private final Map<Class<?>, RenderContext> renderContextMap = new HashMap<>();
+
     public RenderContext() {
     }
 
@@ -44,6 +56,14 @@ public class RenderContext {
         this.variableAlias = variableAlias;
         this.argAlias = argAlias;
     }
+
+    public RenderContext(String variableAlias, String argAlias, List<JoinStatementDefinition> joinStatementDefinitions) {
+        this(variableAlias, argAlias);
+        for(JoinStatementDefinition joinStatementDefinition : joinStatementDefinitions) {
+            renderContextMap.put(joinStatementDefinition.getResultType(), new RenderContext(joinStatementDefinition.getTableIndexAlias(), null));
+        }
+    }
+
 
     public String getVariableAlias() {
         return variableAlias;
@@ -68,4 +88,38 @@ public class RenderContext {
     public void renderBlank() {
         scriptBuilder.append(" ");
     }
+
+    public void renderPropertyPathVariable(PropertyPath propertyPath) {
+        // no entity class, use main table variableAlias
+        if(propertyPath.getEntityClass() == null) {
+            scriptBuilder.append(StringUtils.isEmpty(this.variableAlias) ? propertyPath.getColumnName() : this.variableAlias + "." + propertyPath.getColumnName());
+        }
+        // sub or join tables
+        else if(renderContextMap.containsKey(propertyPath.getEntityClass())){
+            RenderContext joinContext = renderContextMap.get(propertyPath.getEntityClass());
+            scriptBuilder.append(StringUtils.isEmpty(joinContext.variableAlias) ? propertyPath.getColumnName() : joinContext.variableAlias + "." + propertyPath.getColumnName());
+        }
+        // use main table variableAlias
+        else {
+            scriptBuilder.append(StringUtils.isEmpty(this.variableAlias) ? propertyPath.getColumnName() : this.variableAlias + "." + propertyPath.getColumnName());
+        }
+    }
+
+    public void renderPropertyPathArg(PropertyPath propertyPath) {
+        // no entity class, use main table variableAlias
+        if(propertyPath.getEntityClass() == null) {
+            scriptBuilder.append(StringUtils.isEmpty(this.argAlias) ? propertyPath.getName() : this.argAlias + "." + propertyPath.getName());
+        }
+        // sub or join tables
+        else if(renderContextMap.containsKey(propertyPath.getEntityClass())){
+            RenderContext joinContext = renderContextMap.get(propertyPath.getEntityClass());
+            scriptBuilder.append(StringUtils.isEmpty(joinContext.argAlias) ? propertyPath.getName() : joinContext.argAlias + "." + propertyPath.getName());
+        }
+        // use main table variableAlias
+        else {
+            scriptBuilder.append(StringUtils.isEmpty(this.argAlias) ? propertyPath.getName() : this.argAlias + "." + propertyPath.getName());
+        }
+    }
+
+
 }

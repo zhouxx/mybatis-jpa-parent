@@ -63,7 +63,7 @@ public abstract class BaseSelectPreMapperStatementBuilder extends PreMapperState
 
         List<JoinStatementDefinition> joinStatementDefinitions = methodDefinition.getJoinStatementDefinitions();
 
-        String conditionScript = generateConditionScript(mainTableAlias);
+        String conditionScript = generateConditionScript(mainTableAlias, joinStatementDefinitions);
         conditionScript = conditionScript.contains("<where>") ? conditionScript : "<where>" + conditionScript + "</where>";
         List<String> sqlParts = Arrays.asList(
                 "SELECT",
@@ -83,7 +83,7 @@ public abstract class BaseSelectPreMapperStatementBuilder extends PreMapperState
     /**
      * 生成查询条件sql脚本
      */
-    protected abstract String generateConditionScript(String mainTableAlias);
+    protected abstract String generateConditionScript(String mainTableAlias, List<JoinStatementDefinition> joinStatementDefinitions);
 
     /**
      * 生成排序sql脚本

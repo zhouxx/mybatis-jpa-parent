@@ -253,7 +253,7 @@ public class Part implements Render {
 
 		if(testCondition == null) {
 			context.renderString(" AND ");
-			context.renderString(StringUtils.isEmpty(context.getVariableAlias()) ? propertyPath.getColumnName() : context.getVariableAlias() + "." + propertyPath.getColumnName());
+			context.renderPropertyPathVariable(propertyPath);
 			context.renderBlank();
 			context.renderString(typeValue);
 			return;
@@ -294,13 +294,13 @@ public class Part implements Render {
 			context.renderString(StringUtils.collectionToDelimitedString(conditionWithArgs," and "));
 			context.renderString("'>");
 			context.renderString(" AND ");
-			context.renderString(StringUtils.isEmpty(context.getVariableAlias()) ? propertyPath.getColumnName() : context.getVariableAlias() + "." + propertyPath.getColumnName());
+			context.renderPropertyPathVariable(propertyPath);
 			context.renderBlank();
 			context.renderString(typeValue);
 			context.renderString("</if>");
 		} else {
 			context.renderString(" AND ");
-			context.renderString(StringUtils.isEmpty(context.getVariableAlias()) ? propertyPath.getColumnName() : context.getVariableAlias() + "." + propertyPath.getColumnName());
+			context.renderPropertyPathVariable(propertyPath);
 			context.renderBlank();
 			context.renderString(typeValue);
 		}
@@ -411,7 +411,7 @@ public class Part implements Render {
 		}
 
 		/**
-		 * Returns whether the the type supports the given raw property. Default implementation checks whether the property
+		 * Returns whether the type supports the given raw property. Default implementation checks whether the property
 		 * ends with the registered keyword. Does not support the keyword if the property is a valid field as is.
 		 */
 		protected boolean supports(String property) {
