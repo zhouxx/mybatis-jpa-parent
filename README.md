@@ -1,7 +1,7 @@
 <h1 align="center">Mybatis-Jpa</h1>
 <p align="center">A ORM framework</p>
 <p align="center"><b>Smilar with Data Jpa, More Flexible, Base on Mybatis,  Code Generator</b></p>
-<p align="center">English | <a href="https://github.com/zhouxx/mybatis-jpa-parent/blob/master/README.md">中文</a></p>
+<p align="center">English | <a href="https://github.com/zhouxx/mybatis-jpa-parent/blob/master/README-zh.md">中文</a></p>
 
 ## Document
 
