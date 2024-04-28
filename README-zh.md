@@ -2,7 +2,7 @@
 <h1 align="center">Mybatis-Jpa</h1>
 <p align="center">一个ORM框架</p>
 <p align="center"><b>与Data Jpa 类似, 更灵活, 基于Mybatis, 代码生成</b></p>
-<p align="center"><a href="https://zhouxx.github.io/mybatis-jpa-parent/">English</a> | 中文</p>
+<p align="center"><a href="https://github.com/zhouxx/mybatis-jpa-parent">English</a> | 中文</p>
 
 ## 文档
 
