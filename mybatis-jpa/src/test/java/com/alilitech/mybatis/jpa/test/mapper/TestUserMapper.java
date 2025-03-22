@@ -24,6 +24,8 @@ public interface TestUserMapper extends CrudMapper<TestUser, String>, PageMapper
 
     List<TestUser> findByNameStartsWithAndDeptNoLikeOrderByNameDesc(String name, String deptNo);
 
+    List<TestUser> findByOrderByNameDesc();
+
     List<TestUser> findByNameStartsWithOrDeptNoAndAgeGreaterThan(String name, String deptNo, int age);
 
     @IfTest(notEmpty = true)
@@ -43,6 +45,8 @@ public interface TestUserMapper extends CrudMapper<TestUser, String>, PageMapper
     List<TestUser> findByRolesRoleNameLikeAndName(String roleName, String name);
     List<TestUser> findByRolesRoleNameLike(Pageable pageable, String roleName, String name);
     List<TestUser> findByRolesRoleNameLikeOrderByRolesRoleNameDesc(Pageable pageable, String roleName, String name);
+
+    List<TestUser> findByOrderByRolesRoleNameDesc(Pageable pageable);
 
     Integer countByNameAndDeptNo(String name, String deptNo);
 

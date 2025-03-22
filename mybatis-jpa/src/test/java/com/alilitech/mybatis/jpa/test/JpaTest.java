@@ -20,10 +20,7 @@ import com.alilitech.mybatis.MybatisJpaBootstrap;
 import com.alilitech.mybatis.jpa.criteria.UpdateSpecification;
 import com.alilitech.mybatis.jpa.criteria.expression.PredicateExpression;
 import com.alilitech.mybatis.jpa.criteria.specification.Specifications;
-import com.alilitech.mybatis.jpa.domain.Direction;
-import com.alilitech.mybatis.jpa.domain.Order;
-import com.alilitech.mybatis.jpa.domain.Page;
-import com.alilitech.mybatis.jpa.domain.Sort;
+import com.alilitech.mybatis.jpa.domain.*;
 import com.alilitech.mybatis.jpa.test.domain.*;
 import com.alilitech.mybatis.jpa.test.mapper.TestDeptMapper;
 import com.alilitech.mybatis.jpa.test.mapper.TestUserMapper;
@@ -142,6 +139,9 @@ public class JpaTest {
         testUsers = testUserMapper.findByRolesRoleNameLikeOrderByRolesRoleNameDesc(page, "4", "Test");
         System.out.println(testUsers);
 
+        testUsers = testUserMapper.findByOrderByRolesRoleNameDesc(page);
+        System.out.println(testUsers);
+
         testUsers = testUserMapper.findCustomSpecification(Specifications.<TestUser>and().like("rolesRoleName", "4")
                 .order().asc("rolesRoleName").build());
         System.out.println(testUsers);
@@ -186,6 +186,8 @@ public class JpaTest {
         System.out.println(testUserMapper.existsByDeptNo("002"));
         System.out.println(testUserMapper.existsById("1"));
         System.out.println(testUserMapper.findBySex(Sex.FEMALE));
+
+        System.out.println(testUserMapper.findByOrderByNameDesc());
 
 
         //自定义sql不会受影响，完全可以自定义

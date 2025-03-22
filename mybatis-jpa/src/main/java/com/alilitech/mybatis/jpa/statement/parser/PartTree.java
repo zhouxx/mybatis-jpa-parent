@@ -61,6 +61,9 @@ public class PartTree implements Render {
             "^(" + QUERY_PATTERN + ")((\\p{Lu}.*?))??");
     private static final Pattern PREFIX_TEMPLATE = Pattern.compile(
             "^(" + QUERY_PATTERN + "|" + COUNT_PATTERN + "|" + EXISTS_PATTERN + "|" + DELETE_PATTERN + ")((\\p{Lu}.*?))??By");
+
+    private static final Pattern PREFIX_TEMPLATE_ONLY = Pattern.compile(
+            "^(" + QUERY_PATTERN + "|" + COUNT_PATTERN + "|" + EXISTS_PATTERN + "|" + DELETE_PATTERN + ")((\\p{Lu}.*?))??By\b");
     private static final Pattern PREFIX_TEMPLATE_VIRTUAL = Pattern.compile(
             "^(" + QUERY_PATTERN + ")With");
     private static final Pattern PREFIX_TEMPLATE_VIRTUAL_JOIN = Pattern.compile(
@@ -346,6 +349,9 @@ public class PartTree implements Render {
         }
 
         private void buildTree(String source, Optional<Class<?>> domainClassOptional) {
+            if(PREFIX_TEMPLATE_ONLY.matcher(source).find()) {
+                return;
+            }
             AtomicInteger argumentIndex = new AtomicInteger();
             String[] split = split(source, "Or");
             for (String part : split) {
