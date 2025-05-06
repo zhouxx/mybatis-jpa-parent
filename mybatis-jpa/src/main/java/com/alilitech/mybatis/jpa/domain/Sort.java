@@ -15,6 +15,9 @@
  */
 package com.alilitech.mybatis.jpa.domain;
 
+import com.alilitech.mybatis.jpa.criteria.SerializableFunction;
+import org.apache.ibatis.reflection.property.PropertyNamer;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -117,6 +120,24 @@ public class Sort {
     private Sort withDirection(Direction direction) {
         this.orders.forEach(order -> order.setDirection(direction));
         return this;
+    }
+
+    public static <T> TypedSort<T> sort(Class<T> type) {
+        return new TypedSort<>(type);
+    }
+
+    public static class TypedSort<T> {
+
+        private final Class<T> type;
+
+        private TypedSort(Class<T> type) {
+            this.type = type;
+        }
+
+        public <R> Sort by(SerializableFunction<T, R> function) {
+            return new Sort(PropertyNamer.methodToProperty(function.getImplMethodName()));
+        }
+
     }
 
 }

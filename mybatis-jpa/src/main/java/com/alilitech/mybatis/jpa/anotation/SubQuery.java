@@ -32,6 +32,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * @author Zhou Xiaoxiang
  * @since 1.1
  */
+@Deprecated
 @Target({METHOD, FIELD})
 @Retention(RUNTIME)
 @Documented
@@ -41,6 +42,7 @@ public @interface SubQuery {
 
     Order[] orders() default {};
 
+    @Deprecated
     @interface Order {
 
         String property();
@@ -49,6 +51,7 @@ public @interface SubQuery {
 
     }
 
+    @Deprecated
     @interface Predicate {
 
         String property();
