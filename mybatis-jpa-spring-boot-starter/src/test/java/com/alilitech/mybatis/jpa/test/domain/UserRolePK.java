@@ -18,33 +18,25 @@ package com.alilitech.mybatis.jpa.test.domain;
 import lombok.Getter;
 import lombok.Setter;
 
-import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
-import jakarta.persistence.Table;
-
 /**
- * CREATE TABLE `user_role` (
- *   `user_id` varchar(36) NOT NULL COMMENT '用户ID',
- *   `role_id` varchar(36) NOT NULL COMMENT '角色id',
- *   `enabled` tinyint DEFAULT NULL COMMENT '是否启用',
- *   PRIMARY KEY (`user_id`,`role_id`)
- * );
- *
  * @author Zhou Xiaoxiang
  * @since 2.1
  */
-@Table(name = "user_role")
+
 @Getter
 @Setter
-@IdClass(UserRolePK.class)
-public class UserRole {
+public class UserRolePK {
 
-    @Id
+    public UserRolePK() {
+    }
+
+    public UserRolePK(String userId, String roleId) {
+        this.userId = userId;
+        this.roleId = roleId;
+    }
+
     private String userId;
 
-    @Id
     private String roleId;
-
-    private Boolean enabled;
 
 }

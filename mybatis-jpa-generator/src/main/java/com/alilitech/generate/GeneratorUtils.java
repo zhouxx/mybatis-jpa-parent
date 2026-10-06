@@ -29,8 +29,8 @@ import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.TypeResolver;
 import org.apache.maven.plugin.logging.Log;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
+import jakarta.persistence.Column;
+import jakarta.persistence.Id;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -215,10 +215,10 @@ public class GeneratorUtils {
         //生成domain
         ClassDefinition domainDefinition = new ClassDefinition(table.getTableConfig().getDomainName());
         domainDefinition.setClassType(ClassType.DOMAIN).setPackageName(globalPackageName + "." + ClassType.DOMAIN.getType());
-        domainDefinition.addAnnotation(new AnnotationDefinition(javax.persistence.Table.class).addProperty("name", table.getTableConfig().getTableName()));
+        domainDefinition.addAnnotation(new AnnotationDefinition(jakarta.persistence.Table.class).addProperty("name", table.getTableConfig().getTableName()));
 
         if(pkClass != null) {
-            domainDefinition.addAnnotation(new AnnotationDefinition(javax.persistence.IdClass.class).addProperty(null, pkClass));
+            domainDefinition.addAnnotation(new AnnotationDefinition(jakarta.persistence.IdClass.class).addProperty(null, pkClass));
         }
         table.getTableColumns().forEach(tableColumn -> {
             FieldDefinition fieldDefinition = new FieldDefinition(tableColumn.getColumnType(), tableColumn.getProperty());

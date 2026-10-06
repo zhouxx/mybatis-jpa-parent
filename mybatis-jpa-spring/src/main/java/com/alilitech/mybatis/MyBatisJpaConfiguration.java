@@ -94,12 +94,6 @@ public class MyBatisJpaConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public MybatisJpaProperties mybatisJpaProperties() {
-        return new MybatisJpaProperties();
-    }
-
-    @Bean
     public MybatisJpaMapperScanner mybatisJpaMapperScanner() {
         return new MybatisJpaMapperScanner();
     }

@@ -7,7 +7,7 @@ import com.alilitech.mybatis.jpa.parameter.TriggerValueType;
 import com.alilitech.mybatis.jpa.test.utils.CommonUtil;
 import org.apache.ibatis.mapping.SqlCommandType;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Date;
 import java.util.List;
 

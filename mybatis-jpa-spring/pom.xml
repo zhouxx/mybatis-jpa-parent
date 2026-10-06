@@ -5,11 +5,12 @@
     <parent>
         <artifactId>mybatis-jpa-parent</artifactId>
         <groupId>com.alilitech</groupId>
-        <version>2.2.4</version>
+        <version>4.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>mybatis-jpa-spring</artifactId>
+    <name>Mybatis Jpa Spring</name>
 
     <dependencies>
         <dependency>

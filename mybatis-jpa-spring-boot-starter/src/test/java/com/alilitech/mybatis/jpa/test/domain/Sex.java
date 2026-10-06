@@ -15,36 +15,24 @@
  */
 package com.alilitech.mybatis.jpa.test.domain;
 
-import lombok.Getter;
-import lombok.Setter;
-
-import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
-import jakarta.persistence.Table;
+import com.alilitech.mybatis.jpa.anotation.PersistenceValue;
 
 /**
- * CREATE TABLE `user_role` (
- *   `user_id` varchar(36) NOT NULL COMMENT '用户ID',
- *   `role_id` varchar(36) NOT NULL COMMENT '角色id',
- *   `enabled` tinyint DEFAULT NULL COMMENT '是否启用',
- *   PRIMARY KEY (`user_id`,`role_id`)
- * );
- *
  * @author Zhou Xiaoxiang
  * @since 2.1
  */
-@Table(name = "user_role")
-@Getter
-@Setter
-@IdClass(UserRolePK.class)
-public class UserRole {
+public enum Sex {
+    MALE(0),
+    FEMALE(1);
 
-    @Id
-    private String userId;
+    @PersistenceValue
+    private final int code;
 
-    @Id
-    private String roleId;
+    Sex(int code) {
+        this.code = code;
+    }
 
-    private Boolean enabled;
-
+    public int getCode() {
+        return code;
+    }
 }

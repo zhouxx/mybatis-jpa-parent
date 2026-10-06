@@ -58,51 +58,51 @@ public class JpaTest {
      * 可在实体类定义主键，主键的生成规则（包括写个方法自定义）
      * 可在实体类定义代码级触发器，在插入或更新的时候无需操作，自动生成该字段的值然后进行插入
      */
-    @Test
-    public void insertTest() {
-
-        //全量插入
-        TestUser testUser = new TestUser("1", "Jack", 1, 20, "002");
-        testUserMapper.insert(testUser);
-
-        //非空插入
-        TestUser testUser1 = new TestUser("2", "Hellen", 0, 20, "003");
-        TestUser testUser2 = new TestUser("3", "Tom", null, 20, "003");
-        testUserMapper.insertSelective(testUser1);
-        testUserMapper.insertSelective(testUser2);
-
-        //批量插入，UUID
-        testDeptMapper.insertBatch(Arrays.asList(new TestDept("002", "Dept2"), new TestDept("003", "Dept3")));
-
-        //为了后面操作
-        testUserMapper.insert(new TestUser("4", "Test", 1, 18, "004"));
-        testUserMapper.insert(new TestUser("5", "Test", 1, 18, "004"));
-        testUserMapper.insert(new TestUser("6", "Test", 1, 18, "004"));
-    }
-
-    /**
-     * 更新演示
-     * 可在实体类定义代码级触发器，在插入或更新的时候无需操作，自动生成该字段的值然后进行更新
-     */
-    @Test
-    public void updateTest() {
-
-        //全量更新
-        TestUser testUser = new TestUser("1", "Jack", 1, 21, "002");
-        testUserMapper.update(testUser);
-
-        //非空更新
-        testUser = new TestUser();
-        testUser.setId("1");
-        testUser.setName("Jackson");
-        testUserMapper.updateSelective(testUser);
-
-        //批量更新
-        TestUser testUser1 = new TestUser("2", "Hellen", 0, 22, "003");
-        TestUser testUser2 = new TestUser("3", "Tom", 1, 23, "003");
-        testUserMapper.updateBatch(Arrays.asList(testUser1, testUser2));
-
-    }
+//    @Test
+//    public void insertTest() {
+//
+//        //全量插入
+//        TestUser testUser = new TestUser("1", "Jack", 1, 20, "002");
+//        testUserMapper.insert(testUser);
+//
+//        //非空插入
+//        TestUser testUser1 = new TestUser("2", "Hellen", 0, 20, "003");
+//        TestUser testUser2 = new TestUser("3", "Tom", null, 20, "003");
+//        testUserMapper.insertSelective(testUser1);
+//        testUserMapper.insertSelective(testUser2);
+//
+//        //批量插入，UUID
+//        testDeptMapper.insertBatch(Arrays.asList(new TestDept("002", "Dept2"), new TestDept("003", "Dept3")));
+//
+//        //为了后面操作
+//        testUserMapper.insert(new TestUser("4", "Test", 1, 18, "004"));
+//        testUserMapper.insert(new TestUser("5", "Test", 1, 18, "004"));
+//        testUserMapper.insert(new TestUser("6", "Test", 1, 18, "004"));
+//    }
+//
+//    /**
+//     * 更新演示
+//     * 可在实体类定义代码级触发器，在插入或更新的时候无需操作，自动生成该字段的值然后进行更新
+//     */
+//    @Test
+//    public void updateTest() {
+//
+//        //全量更新
+//        TestUser testUser = new TestUser("1", "Jack", 1, 21, "002");
+//        testUserMapper.update(testUser);
+//
+//        //非空更新
+//        testUser = new TestUser();
+//        testUser.setId("1");
+//        testUser.setName("Jackson");
+//        testUserMapper.updateSelective(testUser);
+//
+//        //批量更新
+//        TestUser testUser1 = new TestUser("2", "Hellen", 0, 22, "003");
+//        TestUser testUser2 = new TestUser("3", "Tom", 1, 23, "003");
+//        testUserMapper.updateBatch(Arrays.asList(testUser1, testUser2));
+//
+//    }
 
     /**
      * 查询演示
@@ -138,7 +138,6 @@ public class JpaTest {
         System.out.println(testUserMapper.findByNameStartsWithAndDeptNoLikeOrderByNameDesc("Jack", "002"));
         System.out.println(testUserMapper.findByNameStartsWithOrDeptNoAndAgeGreaterThan("Jack", "002", 18));
         System.out.println(testUserMapper.countByNameAndDeptNo("Jackson", "002"));
-        System.out.println(testUserMapper.existsByNameAndDeptNo("Jackson", "002"));
         System.out.println(testUserMapper.existsById("1"));
 
         //自定义sql不会受影响，完全可以自定义

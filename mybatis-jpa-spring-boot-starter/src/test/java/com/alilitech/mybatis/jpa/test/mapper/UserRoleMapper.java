@@ -13,38 +13,16 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.alilitech.mybatis.jpa.test.domain;
+package com.alilitech.mybatis.jpa.test.mapper;
 
-import lombok.Getter;
-import lombok.Setter;
-
-import jakarta.persistence.Id;
-import jakarta.persistence.IdClass;
-import jakarta.persistence.Table;
+import com.alilitech.mybatis.jpa.mapper.CrudMapper;
+import com.alilitech.mybatis.jpa.test.domain.UserRole;
+import com.alilitech.mybatis.jpa.test.domain.UserRolePK;
 
 /**
- * CREATE TABLE `user_role` (
- *   `user_id` varchar(36) NOT NULL COMMENT '用户ID',
- *   `role_id` varchar(36) NOT NULL COMMENT '角色id',
- *   `enabled` tinyint DEFAULT NULL COMMENT '是否启用',
- *   PRIMARY KEY (`user_id`,`role_id`)
- * );
- *
  * @author Zhou Xiaoxiang
  * @since 2.1
  */
-@Table(name = "user_role")
-@Getter
-@Setter
-@IdClass(UserRolePK.class)
-public class UserRole {
-
-    @Id
-    private String userId;
-
-    @Id
-    private String roleId;
-
-    private Boolean enabled;
+public interface UserRoleMapper extends CrudMapper<UserRole, UserRolePK> {
 
 }

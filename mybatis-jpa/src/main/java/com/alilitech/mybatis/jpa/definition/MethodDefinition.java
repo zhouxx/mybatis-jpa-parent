@@ -19,6 +19,8 @@ import com.alilitech.mybatis.jpa.anotation.IfTest;
 import com.alilitech.mybatis.jpa.criteria.SpecificationType;
 import com.alilitech.mybatis.jpa.exception.ParameterNumberNotMatchException;
 import com.alilitech.mybatis.jpa.statement.parser.PartTree;
+import org.apache.ibatis.session.ResultHandler;
+import org.apache.ibatis.session.RowBounds;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -229,6 +231,26 @@ public class MethodDefinition {
 
     public int getSortIndex() {
         return sortIndex;
+    }
+
+    /**
+     * MyBatis 多参数别名的序号。arg 使用 Java 参数下标，从 0 开始，Pageable 也占一位。
+     * param 从 1 开始，并且跳过 RowBounds（Pageable）和 ResultHandler。
+     */
+    public int mybatisParamOrdinal(int argumentIndex) {
+        int ordinal = 0;
+        for (int i = 0; i <= argumentIndex && i < parameterDefinitions.size(); i++) {
+            Class<?> parameterClass = parameterDefinitions.get(i).getParameterClass();
+            if (RowBounds.class.isAssignableFrom(parameterClass) || ResultHandler.class.isAssignableFrom(parameterClass)) {
+                continue;
+            }
+            ordinal++;
+        }
+        return ordinal;
+    }
+
+    public String mybatisParamName(int argumentIndex) {
+        return "param" + mybatisParamOrdinal(argumentIndex);
     }
 
     public boolean isSpecification() {

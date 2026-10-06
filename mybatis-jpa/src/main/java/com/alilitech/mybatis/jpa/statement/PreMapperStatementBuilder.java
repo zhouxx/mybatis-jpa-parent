@@ -173,7 +173,7 @@ public abstract class PreMapperStatementBuilder extends BaseBuilder {
     protected String buildSort(String tableAlias) {
         String columnPrefix = tableAlias == null ? "" : tableAlias + ".";
         if(methodDefinition.getSortIndex() > -1) {
-            String paramName = methodDefinition.isOneParameter() ? "_parameter" : ("arg" + methodDefinition.getSortIndex());
+            String paramName = methodDefinition.isOneParameter() ? "_parameter" : methodDefinition.mybatisParamName(methodDefinition.getSortIndex());
             StringBuilder orderString = new StringBuilder()
                     .append("<if test=\"" + paramName + "!= null\">")
                     .append("<foreach item=\"item\" index=\"index\" open=\"ORDER BY\" separator=\", \" close=\"\" collection=\"" + paramName + ".orders\">")

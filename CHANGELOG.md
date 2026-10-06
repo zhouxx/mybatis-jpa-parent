@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v4.0.0] 2026.10.6
+
+* other: 对齐 Spring Boot 4.1.1 / Java 17。持久化注解改为 jakarta.persistence，自动配置改为 AutoConfiguration.imports，mybatis-spring-boot-starter 升级到 4.1.0
+* fix bug: 方法查询的参数占位改为 `param1`、`param2`。序号从 1 开始，并且不为 `Pageable`（`RowBounds`）编号，开启 `-parameters` 后不再依赖 `arg0`、`arg1`
+
 ## [v2.2.4] 2025.5.6
 
 * feature: 提供TypedSort更方便地构建排序

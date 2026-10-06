@@ -7,6 +7,7 @@ import com.alilitech.mybatis.jpa.domain.Sort;
 import com.alilitech.mybatis.jpa.mapper.CrudMapper;
 import com.alilitech.mybatis.jpa.mapper.PageMapper;
 import com.alilitech.mybatis.jpa.mapper.SpecificationMapper;
+import com.alilitech.mybatis.jpa.test.domain.Sex;
 import com.alilitech.mybatis.jpa.test.domain.TestUser;
 import org.apache.ibatis.annotations.Select;
 
@@ -37,9 +38,17 @@ public interface TestUserMapper extends CrudMapper<TestUser, String>, PageMapper
 
     List<TestUser> findByNameLike(String name);
 
+    List<TestUser> findByRolesRoleName(String roleName);
+
+    List<TestUser> findByRolesRoleNameLikeAndName(String roleName, String name);
+    List<TestUser> findByRolesRoleNameLike(Pageable pageable, String roleName, String name);
+    List<TestUser> findByRolesRoleNameLikeOrderByRolesRoleNameDesc(Pageable pageable, String roleName, String name);
+
     Integer countByNameAndDeptNo(String name, String deptNo);
 
-    Boolean existsByNameAndDeptNo(String name, String deptNo);
+    Boolean existsByDeptNo(String deptNo);
+
+    List<TestUser> findBySex(Sex sex);
 
     int deleteByNameAndDeptNo(String name, String deptNo);
 

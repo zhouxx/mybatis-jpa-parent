@@ -18,9 +18,9 @@ package com.alilitech.mybatis.jpa.test.domain;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Table;
 
 /**
  * CREATE TABLE `user_role` (

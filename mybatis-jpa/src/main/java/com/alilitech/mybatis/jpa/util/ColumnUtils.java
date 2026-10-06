@@ -15,7 +15,7 @@
  */
 package com.alilitech.mybatis.jpa.util;
 
-import javax.persistence.Column;
+import jakarta.persistence.Column;
 import java.lang.reflect.Field;
 
 

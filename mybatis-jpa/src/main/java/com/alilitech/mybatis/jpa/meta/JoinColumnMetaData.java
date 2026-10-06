@@ -19,8 +19,8 @@ package com.alilitech.mybatis.jpa.meta;
 import com.alilitech.mybatis.jpa.JoinType;
 import com.alilitech.mybatis.jpa.anotation.SubQuery;
 
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;

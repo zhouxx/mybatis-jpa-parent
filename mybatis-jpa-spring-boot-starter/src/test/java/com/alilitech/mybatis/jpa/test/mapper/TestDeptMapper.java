@@ -8,4 +8,5 @@ import com.alilitech.mybatis.jpa.test.domain.TestDept;
  */
 public interface TestDeptMapper extends CrudMapper<TestDept, String> {
 
+
 }

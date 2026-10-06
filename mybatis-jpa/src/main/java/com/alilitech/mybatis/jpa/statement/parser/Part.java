@@ -53,6 +53,11 @@ public class Part implements Render {
 
 	private int argumentIndex;
 
+	/**
+	 * argumentIndex 对应的 MyBatis param 序号，从 1 开始。
+	 */
+	private int mybatisParamOrdinal;
+
 	private Class<?> argumentType;
 
 	/**
@@ -85,8 +90,9 @@ public class Part implements Render {
 			argumentIndex.incrementAndGet();
 		}
 
-		//设置当前参数索引
+		//设置当前参数索引。param 序号另行计算：从 1 起，且不计 Pageable。
 		this.argumentIndex = argumentIndex.get();
+		this.mybatisParamOrdinal = methodDefinition.mybatisParamOrdinal(this.argumentIndex);
 		//设置参数类型
 		argumentType = methodDefinition.getParameterDefinitions().get(argumentIndex.get()).getParameterClass();
 
@@ -105,8 +111,8 @@ public class Part implements Render {
 				countKey += "._parameter";
 				key += "._parameter";
 			} else {
-				countKey += (".arg" + this.getArgumentIndex());
-				key += (".arg" + this.getArgumentIndex());
+				countKey += ("." + genericParamName(this.getArgumentIndex()));
+				key += ("." + genericParamName(this.getArgumentIndex()));
 			}
 			LikeContainer.getInstance().put(key, this.getLikeType());
 
@@ -229,7 +235,8 @@ public class Part implements Render {
 
 		String typeValue = type.toString();
 
-		//替换占位符为arg0，arg1...
+		// 多参数使用 MyBatis 始终注册的 param1、param2。
+		// 未开启 -parameters 时 JDK 才会合成 arg0、arg1，开启后这些名字不存在。
 		if(type.getNumberOfArguments() > 0) {
 
 			if(this.isOneParameter()) {
@@ -242,8 +249,9 @@ public class Part implements Render {
 			} else {
 				for(int i=0; i<this.getNumberOfArguments(); i++) {
 					if(StringUtils.isEmpty(context.getArgAlias())) {
-						typeValue = typeValue.replace("#{" + i +  "}", "#{arg" + (argumentIndex +i) + "}");
-						typeValue = typeValue.replace("@{" + i +  "}", "arg" + (argumentIndex +i));
+						String paramName = genericParamName(argumentIndex + i);
+						typeValue = typeValue.replace("#{" + i +  "}", "#{" + paramName + "}");
+						typeValue = typeValue.replace("@{" + i +  "}", paramName);
 					} else {
 						typeValue = typeValue.replace("#{" + i +  "}", "#{" + context.getArgAlias() + "." + propertyPath.getName() + "}");
 					}
@@ -259,9 +267,18 @@ public class Part implements Render {
 			return;
 		}
 
-		// 一个参数设置为_parameter
-		// 如果是集合，强制设置成arg_,集合没有_parameter参数
-		String paraName = this.isOneParameter() ? (type == Type.IN ? "arg" + this.getArgumentIndex() : "_parameter") : "arg" + this.getArgumentIndex();
+		// 单参数用 _parameter。单个集合在 ParamMap 里是 collection/array，没有 param1。
+		// 多参数用 paramN，-parameters 打开后 argN 不会再放进参数表。
+		String paraName;
+		if(this.isOneParameter()) {
+			if(type == Type.IN) {
+				paraName = argumentType.isArray() ? "array" : "collection";
+			} else {
+				paraName = "_parameter";
+			}
+		} else {
+			paraName = genericParamName(this.getArgumentIndex());
+		}
 
 		List<ConditionWithArg> conditions = new ArrayList<>();
 
@@ -305,6 +322,13 @@ public class Part implements Render {
 			context.renderString(typeValue);
 		}
 
+	}
+
+	/**
+	 * argN 的 N 是 Java 下标。这里的 javaIndex 与 {@link #argumentIndex} 的差值，加到已经跳过 RowBounds 的 param 序号上。
+	 */
+	private String genericParamName(int javaIndex) {
+		return "param" + (mybatisParamOrdinal + javaIndex - argumentIndex);
 	}
 
 	/**
